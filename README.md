@@ -1,6 +1,6 @@
 # 🦆 Atlas Sports - Comunidad de Duck Game
 
-![Atlas Sports Banner](assets/hero.png)
+##[Open page](https://electrojlkm.github.io/AtlasSports)
 
 **Pilar de la comunidad de Duck Game**. Un espacio donde los jugadores se reúnen para socializar, competir y demostrar habilidad en uno de los juegos más caóticos y divertidos.
 
