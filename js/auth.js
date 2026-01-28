@@ -1,127 +1,129 @@
-// Configuración SEGURA - Las variables de entorno se configuran en el servidor
-// Para desarrollo local, crea un archivo .env.local (no lo subas a GitHub)
+// auth.js - Versión SEGURA para GitHub Pages
+// NUNCA pongas claves reales aquí. Usaremos un método alternativo.
 
-// Método 1: Usando variables de entorno (recomendado para producción)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || window.location.origin;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-// Método 2: Para desarrollo rápido (NUNCA subir esto a GitHub)
-// const SUPABASE_URL = 'https://tu-proyecto.supabase.co';
-// const SUPABASE_ANON_KEY = 'tu-clave-anon-publica';
-
-// Importar Supabase (necesitarás instalarlo: npm install @supabase/supabase-js)
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-// Crear cliente solo si tenemos las credenciales
-let supabase;
-if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-  supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} else {
-  console.warn('Credenciales de Supabase no configuradas. La autenticación no funcionará.');
-}
-
-// Manejo de Login
-export async function handleLogin(email, password) {
-  if (!supabase) {
-    throw new Error('Sistema de autenticación no configurado. Contacta al administrador.');
+class AuthManager {
+  constructor() {
+    // Método 1: Para desarrollo local (claves ficticias)
+    // En producción real, necesitarás un backend ligero
+    this.config = {
+      supabaseUrl: '',
+      supabaseKey: '',
+      isConfigured: false
+    };
+    
+    this.init();
   }
-
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password
+  
+  init() {
+    // Verificar si estamos en GitHub Pages
+    if (window.location.hostname.includes('github.io')) {
+      console.log('Modo GitHub Pages activado - Autenticación limitada');
+      this.setupMockAuth(); // Usar autenticación simulada temporalmente
+    } else {
+      console.log('Modo desarrollo local');
+      // Aquí podrías cargar config local (pero NO subirla a GitHub)
+    }
+  }
+  
+  setupMockAuth() {
+    // Sistema temporal de autenticación simulada
+    // PARA PRODUCCIÓN REAL: Necesitas un backend separado
+    console.warn('⚠️ Usando autenticación simulada. Para producción, implementa un backend.');
+    
+    // Simular sesión en localStorage
+    this.user = JSON.parse(localStorage.getItem('atlas_mock_user')) || null;
+    this.updateUI();
+  }
+  
+  async mockLogin(email, password) {
+    // Simulación de login - EN PRODUCCIÓN REEMPLAZA CON SUPABASE REAL
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (email && password.length >= 6) {
+          this.user = {
+            email: email,
+            username: email.split('@')[0],
+            id: 'mock_' + Date.now(),
+            isMock: true
+          };
+          
+          localStorage.setItem('atlas_mock_user', JSON.stringify(this.user));
+          this.updateUI();
+          resolve({ user: this.user });
+        } else {
+          reject(new Error('Credenciales inválidas (simulado)'));
+        }
+      }, 500);
     });
-
-    if (error) throw error;
-
-    // Login exitoso
-    console.log('Usuario autenticado:', data.user.email);
-    
-    // Guardar sesión en localStorage (opcional)
-    localStorage.setItem('atlas_user', JSON.stringify({
-      email: data.user.email,
-      id: data.user.id
-    }));
-    
-    // Redirigir al dashboard o página principal
+  }
+  
+  async mockRegister(email, password, username) {
+    // Simulación de registro
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (email && password && username) {
+          this.user = {
+            email: email,
+            username: username,
+            id: 'mock_' + Date.now(),
+            isMock: true
+          };
+          
+          localStorage.setItem('atlas_mock_user', JSON.stringify(this.user));
+          this.updateUI();
+          resolve({ user: this.user });
+        } else {
+          reject(new Error('Datos incompletos (simulado)'));
+        }
+      }, 500);
+    });
+  }
+  
+  logout() {
+    localStorage.removeItem('atlas_mock_user');
+    this.user = null;
+    this.updateUI();
     window.location.href = 'index.html';
+  }
+  
+  updateUI() {
+    // Actualizar botones de login/logout en todas las páginas
+    const authElements = document.querySelectorAll('.auth');
     
-    return data;
-  } catch (error) {
-    console.error('Error en login:', error.message);
-    throw new Error(
-      error.message === 'Invalid login credentials'
-        ? 'Correo o contraseña incorrectos.'
-        : 'Error en el servidor. Intenta más tarde.'
-    );
-  }
-}
-
-// Manejo de Registro
-export async function handleRegister(email, password, username) {
-  if (!supabase) {
-    throw new Error('Sistema de autenticación no configurado.');
-  }
-
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: password,
-      options: {
-        data: {
-          username: username.trim(),
-          created_at: new Date().toISOString()
-        },
-        emailRedirectTo: `${window.location.origin}/login.html`
+    authElements.forEach(element => {
+      if (this.user) {
+        element.innerHTML = `
+          <span style="margin-right: 1rem;">👋 ${this.user.username}</span>
+          <a href="#" id="logoutBtn" class="btn">Cerrar Sesión</a>
+        `;
+        
+        const logoutBtn = element.querySelector('#logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.logout();
+          });
+        }
+      } else {
+        element.innerHTML = `
+          <a href="login.html" class="login-btn">Iniciar Sesión</a>
+          <a href="register.html" class="btn">Registrarse</a>
+        `;
       }
     });
-
-    if (error) throw error;
-
-    return data;
-  } catch (error) {
-    console.error('Error en registro:', error);
-    throw new Error(
-      error.message.includes('already registered')
-        ? 'Este correo ya está registrado.'
-        : 'Error al crear la cuenta. Intenta nuevamente.'
-    );
+  }
+  
+  isAuthenticated() {
+    return !!this.user;
   }
 }
 
-// Verificar si hay sesión activa
-export async function checkAuth() {
-  if (!supabase) return null;
-  
-  const { data } = await supabase.auth.getSession();
-  return data.session;
-}
+// Exportar instancia única
+const authManager = new AuthManager();
+export default authManager;
 
-// Cerrar sesión
-export async function handleLogout() {
-  if (!supabase) return;
-  
-  const { error } = await supabase.auth.signOut();
-  if (error) console.error('Error al cerrar sesión:', error);
-  
-  localStorage.removeItem('atlas_user');
-  window.location.href = 'index.html';
-}
-
-// Verificar estado de autenticación al cargar la página
-document.addEventListener('DOMContentLoaded', async () => {
-  const session = await checkAuth();
-  const authElements = document.querySelectorAll('.auth');
-  
-  if (session && authElements.length > 0) {
-    // Usuario está logueado - mostrar perfil
-    authElements.forEach(element => {
-      element.innerHTML = `
-        <span style="margin-right: 1rem;">👋 ${session.user.email}</span>
-        <a href="#" id="logoutBtn" class="btn">Cerrar Sesión</a>
-      `;
-      
-      element.querySelector('#logoutBtn').addEventListener('click', handleLogout);
-    });
-  }
-});
+// Funciones de conveniencia para importar
+export const handleLogin = (email, password) => authManager.mockLogin(email, password);
+export const handleRegister = (email, password, username) => authManager.mockRegister(email, password, username);
+export const handleLogout = () => authManager.logout();
+export const checkAuth = () => authManager.isAuthenticated();
