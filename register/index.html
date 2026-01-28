@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Register | AtlasSports</title>
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+
+<h2>Crear cuenta</h2>
+
+<form id="register-form">
+  <input type="text" id="username" placeholder="Nombre de usuario" required />
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="password" id="password" placeholder="Contraseña" required />
+  <button type="submit">Registrarse</button>
+</form>
+
+<p id="msg"></p>
+
+<script src="../js/supabase.js"></script>
+<script>
+const form = document.getElementById("register-form");
+const msg = document.getElementById("msg");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = email.value;
+  const password = password.value;
+  const username = document.getElementById("username").value;
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        username: username
+      },
+      emailRedirectTo: "https://electrojlkm.github.io/AtlasSports/login/"
+    }
+  });
+
+  if (error) {
+    msg.textContent = error.message;
+  } else {
+    msg.textContent = "Revisa tu email para verificar la cuenta.";
+  }
+});
+</script>
+
+</body>
+</html>
