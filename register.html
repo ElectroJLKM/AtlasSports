@@ -1,1 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrarse - Atlas Sports</title>
+  <link rel="stylesheet" href="css/main.css">
+  
+  <!-- Cargar Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  
+  <style>
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 200px);
+      padding: 2rem;
+    }
+    
+    .auth-card {
+      background-color: rgba(30, 41, 59, 0.8);
+      padding: 2.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 400px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .auth-card h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      font-size: 16px;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #5865f2;
+      box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+    }
+    
+    .error-message {
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .success-message {
+      color: #51cf66;
+      background: rgba(81, 207, 102, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .password-hint {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+    
+    .username-check {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 5px;
+    }
+    
+    .check-btn {
+      padding: 6px 12px;
+      background: #334155;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    
+    .check-btn:hover {
+      background: #475569;
+    }
+    
+    .available {
+      color: #51cf66;
+      font-size: 0.85rem;
+    }
+    
+    .taken {
+      color: #ff6b6b;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">
+      <img src="assets/logo.png" class="logo" alt="Logo Atlas Sports">
+      <a href="index.html" style="color: inherit; text-decoration: none;">
+        <span>Atlas Sports</span>
+      </a>
+    </div>
+    <div class="auth">
+      <a href="index.html" class="login-btn">Volver al inicio</a>
+      <a href="login.html" class="btn">Ya tengo cuenta</a>
+    </div>
+  </header>
 
+  <main class="auth-container">
+    <div class="auth-card">
+      <h2>Crear Cuenta</h2>
+      
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message" style="display: none;"></div>
+      
+      <form id="registerForm">
+        <!-- Nombre de Usuario -->
+        <div class="form-group">
+          <label for="username">Nombre de Usuario *</label>
+          <input 
+            type="text" 
+            id="username" 
+            required 
+            placeholder="ej: duckMaster99"
+            minlength="3"
+            maxlength="20"
+            pattern="[a-zA-Z0-9_]+"
+            title="Solo letras, números y guiones bajos"
+          >
+          <div class="username-check">
+            <button type="button" id="checkUsernameBtn" class="check-btn">
+              Verificar disponibilidad
+            </button>
+            <span id="usernameStatus"></span>
+          </div>
+          <div class="password-hint">
+            Mínimo 3 caracteres, solo letras, números y _
+          </div>
+        </div>
+        
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Correo Electrónico *</label>
+          <input 
+            type="email" 
+            id="email" 
+            required 
+            placeholder="tu@email.com"
+          >
+        </div>
+        
+        <!-- Contraseña -->
+        <div class="form-group">
+          <label for="password">Contraseña *</label>
+          <input 
+            type="password" 
+            id="password" 
+            required 
+            placeholder="••••••••"
+            minlength="6"
+          >
+          <div class="password-hint">
+            Mínimo 6 caracteres
+          </div>
+        </div>
+        
+        <!-- Confirmar Contraseña -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar Contraseña *</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            required 
+            placeholder="••••••••"
+          >
+        </div>
+        
+        <button type="submit" class="btn" style="width: 100%; padding: 12px; margin-top: 1rem;">
+          Crear Cuenta
+        </button>
+      </form>
+      
+      <div style="text-align: center; margin-top: 2rem; color: #cbd5e1;">
+        <p>¿Ya tienes cuenta? <a href="login.html" style="color: #5865f2;">Inicia sesión aquí</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // CONFIGURACIÓN SUPABASE (usa tus claves)
+    const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Verificar si el username está disponible
+    async function checkUsernameAvailability(username) {
+      if (username.length < 3) {
+        return { available: false, message: "Mínimo 3 caracteres" };
+      }
+      
+      try {
+        // Verificar en la tabla profiles (usando RLS - select_public_profiles)
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', username)
+          .maybeSingle();  // Devuelve null si no existe
+        
+        if (error) throw error;
+        
+        return { 
+          available: !data, 
+          message: data ? "Username no disponible" : "✅ Disponible"
+        };
+      } catch (error) {
+        console.error("Error checking username:", error);
+        return { available: false, message: "Error al verificar" };
+      }
+    }
+    
+    // Validar que las contraseñas coincidan
+    function validatePasswords(password, confirmPassword) {
+      if (password !== confirmPassword) {
+        return { valid: false, message: "Las contraseñas no coinciden" };
+      }
+      
+      if (password.length < 6) {
+        return { valid: false, message: "Mínimo 6 caracteres" };
+      }
+      
+      return { valid: true, message: "" };
+    }
+    
+    // Manejar el formulario de registro
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      const errorElement = document.getElementById('errorMessage');
+      const successElement = document.getElementById('successMessage');
+      
+      // Limpiar mensajes
+      errorElement.style.display = 'none';
+      successElement.style.display = 'none';
+      
+      // 1. Validar contraseñas
+      const passwordValidation = validatePasswords(password, confirmPassword);
+      if (!passwordValidation.valid) {
+        errorElement.textContent = passwordValidation.message;
+        errorElement.style.display = 'block';
+        return;
+      }
+      
+      // 2. Verificar username disponible
+      const usernameCheck = await checkUsernameAvailability(username);
+      if (!usernameCheck.available) {
+        errorElement.textContent = usernameCheck.message;
+        errorElement.style.display = 'block';
+        return;
+      }
+      
+      // 3. Mostrar carga
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = "Creando cuenta...";
+      submitBtn.disabled = true;
+      
+      try {
+        // 4. Registrar usuario en Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              username: username  // Esto va a user_metadata
+            },
+            // URL a la que redirige después de confirmar email
+            emailRedirectTo: `https://electrojlkm.github.io/AtlasSports/login.html?verified=true`
+          }
+        });
+        
+        if (authError) {
+          // Manejar errores comunes
+          let errorMsg = authError.message;
+          
+          if (authError.message.includes('already registered')) {
+            errorMsg = "Este email ya está registrado";
+          } else if (authError.message.includes('invalid email')) {
+            errorMsg = "Email inválido";
+          } else if (authError.message.includes('Password')) {
+            errorMsg = "La contraseña es muy débil";
+          }
+          
+          throw new Error(errorMsg);
+        }
+        
+        // 5. Registro exitoso
+        if (authData.user) {
+          // MOSTRAR MENSAJE DE ÉXITO
+          successElement.innerHTML = `
+            <strong>¡Cuenta creada exitosamente!</strong><br><br>
+            
+            📧 <strong>Revisa tu email para confirmar la cuenta.</strong><br>
+            Hemos enviado un enlace de confirmación a: <strong>${email}</strong><br><br>
+            
+            <small style="color: #94a3b8;">
+              ¿No ves el email? Revisa tu carpeta de spam.<br>
+              El enlace expira en 24 horas.
+            </small>
+          `;
+          successElement.style.display = 'block';
+          
+          // Limpiar formulario
+          document.getElementById('registerForm').reset();
+          document.getElementById('usernameStatus').textContent = '';
+          
+          // Redirigir después de 5 segundos
+          setTimeout(() => {
+            window.location.href = "login.html?registered=true";
+          }, 5000);
+        }
+        
+      } catch (error) {
+        // Mostrar error
+        errorElement.textContent = error.message;
+        errorElement.style.display = 'block';
+      } finally {
+        // Restaurar botón
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+    
+    // Botón para verificar username
+    document.getElementById('checkUsernameBtn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim();
+      const statusElement = document.getElementById('usernameStatus');
+      
+      if (username.length < 3) {
+        statusElement.textContent = "Mínimo 3 caracteres";
+        statusElement.className = "taken";
+        return;
+      }
+      
+      // Validar formato
+      const validFormat = /^[a-zA-Z0-9_]+$/.test(username);
+      if (!validFormat) {
+        statusElement.textContent = "Solo letras, números y _";
+        statusElement.className = "taken";
+        return;
+      }
+      
+      // Mostrar "verificando..."
+      statusElement.textContent = "Verificando...";
+      statusElement.className = "";
+      
+      // Verificar disponibilidad
+      const result = await checkUsernameAvailability(username);
+      
+      if (result.available) {
+        statusElement.textContent = result.message;
+        statusElement.className = "available";
+      } else {
+        statusElement.textContent = result.message;
+        statusElement.className = "taken";
+      }
+    });
+    
+    // Verificar automáticamente al escribir username
+    let usernameTimeout;
+    document.getElementById('username').addEventListener('input', (e) => {
+      clearTimeout(usernameTimeout);
+      
+      const username = e.target.value.trim();
+      if (username.length >= 3) {
+        usernameTimeout = setTimeout(async () => {
+          const result = await checkUsernameAvailability(username);
+          const statusElement = document.getElementById('usernameStatus');
+          
+          if (result.available) {
+            statusElement.textContent = result.message;
+            statusElement.className = "available";
+          } else {
+            statusElement.textContent = result.message;
+            statusElement.className = "taken";
+          }
+        }, 500);
+      }
+    });
+    
+    // Verificar si ya está logueado
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
+</html>
