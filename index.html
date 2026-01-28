@@ -105,12 +105,9 @@
   <!-- Script de autenticación -->
   <script>
     // CONFIGURACIÓN SEGURA PARA GITHUB PAGES
-    // IMPORTANTE: Estas son las claves CORRECTAS para tu proyecto
-    
     const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
     
-    // Crear cliente de Supabase
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     // Verificar si el usuario está logueado
@@ -124,6 +121,23 @@
       }
     }
     
+    // Obtener perfil del usuario actual
+    async function getCurrentUserProfile(userId) {
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', userId)
+          .single();
+        
+        if (error) throw error;
+        return profile;
+      } catch (error) {
+        console.error("Error obteniendo perfil:", error);
+        return null;
+      }
+    }
+    
     // Actualizar la UI según el estado de autenticación
     async function updateAuthUI() {
       const authSection = document.getElementById('authSection');
@@ -132,18 +146,20 @@
       const session = await checkAuth();
       
       if (session && session.user) {
-        // Usuario logueado - mostrar perfil
-        const userEmail = session.user.email || "Usuario";
-        const userName = session.user.user_metadata?.username || userEmail.split('@')[0];
+        // Obtener username del perfil
+        const profile = await getCurrentUserProfile(session.user.id);
+        const userName = profile?.username || session.user.user_metadata?.username || session.user.email.split('@')[0];
         
         authSection.innerHTML = `
           <div class="user-badge">
-            <span>👋 ${userName}</span>
+            <a href="profile.html?u=${userName}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+              <span>👋 ${userName}</span>
+            </a>
           </div>
           <button onclick="logout()" class="btn">Cerrar Sesión</button>
         `;
       } else {
-        // Usuario NO logueado - mostrar login/register
+        // Usuario NO logueado
         authSection.innerHTML = `
           <a href="login.html" class="login-btn">Iniciar Sesión</a>
           <a href="register.html" class="btn">Registrarse</a>
@@ -155,7 +171,6 @@
     async function logout() {
       try {
         await supabase.auth.signOut();
-        // Redirigir a la página principal
         window.location.href = "index.html";
       } catch (error) {
         console.error("Error logging out:", error);
