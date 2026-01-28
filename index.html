@@ -6,26 +6,45 @@
   <title>Atlas Sports - Comunidad de Duck Game</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="icon" href="assets/logo.png" type="image/png">
+  
+  <!-- Cargar Supabase desde CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  
+  <style>
+    /* Pequeños ajustes adicionales */
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin-right: 15px;
+    }
+  </style>
 </head>
 <body>
   <!-- Header/Navbar -->
   <header class="navbar">
     <div class="brand">
       <img src="assets/logo.png" class="logo" alt="Logo Atlas Sports">
-      <span>Atlas Sports</span>
+      <a href="index.html" style="color: inherit; text-decoration: none;">
+        <span>Atlas Sports</span>
+      </a>
     </div>
 
     <nav class="menu">
       <a href="#inicio">Inicio</a>
-      <a href="pages/noticias.html">Noticias</a>
-      <a href="pages/ranked.html">Ranked</a>
-      <a href="pages/torneos.html">Torneos</a>
-      <a href="pages/comunidad.html">Comunidad</a>
+      <a href="noticias.html">Noticias</a>
+      <a href="ranked.html">Ranked</a>
+      <a href="torneos.html">Torneos</a>
+      <a href="comunidad.html">Comunidad</a>
     </nav>
 
-    <div class="auth">
+    <div class="auth" id="authSection">
+      <!-- Aquí se cargará dinámicamente login/register o perfil -->
       <a href="login.html" class="login-btn">Iniciar Sesión</a>
-      <a href="register.html" class="btn register-btn">Registrarse</a>
+      <a href="register.html" class="btn">Registrarse</a>
     </div>
   </header>
 
@@ -40,10 +59,10 @@
         </p>
         <div class="hero-buttons">
           <a href="https://discord.gg/7ueUkNj5wX" class="cta discord-btn" target="_blank" rel="noopener">
-            <img src="assets/discord-icon.svg" alt="Discord" class="btn-icon">
+            <img src="assets/discord-icon.svg" alt="Discord" class="btn-icon" style="filter: brightness(0) invert(1);">
             Únete a nuestro Discord
           </a>
-          <a href="pages/torneos.html" class="cta secondary-btn">
+          <a href="torneos.html" class="cta secondary-btn">
             Ver Torneos Activos
           </a>
         </div>
@@ -77,12 +96,74 @@
   <footer class="footer">
     <p>Atlas Sports © 2025 - Comunidad de Duck Game</p>
     <p>
-      <a href="pages/terminos.html">Términos</a> |
-      <a href="pages/privacidad.html">Privacidad</a> |
+      <a href="terminos.html">Términos</a> |
+      <a href="privacidad.html">Privacidad</a> |
       <a href="https://discord.gg/7ueUkNj5wX" target="_blank" rel="noopener">Contacto</a>
     </p>
   </footer>
 
-  <script src="js/main.js" type="module"></script>
+  <!-- Script de autenticación -->
+  <script>
+    // CONFIGURACIÓN SEGURA PARA GITHUB PAGES
+    // IMPORTANTE: Estas son las claves CORRECTAS para tu proyecto
+    
+    const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
+    
+    // Crear cliente de Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Verificar si el usuario está logueado
+    async function checkAuth() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        return session;
+      } catch (error) {
+        console.error("Error checking auth:", error);
+        return null;
+      }
+    }
+    
+    // Actualizar la UI según el estado de autenticación
+    async function updateAuthUI() {
+      const authSection = document.getElementById('authSection');
+      if (!authSection) return;
+      
+      const session = await checkAuth();
+      
+      if (session && session.user) {
+        // Usuario logueado - mostrar perfil
+        const userEmail = session.user.email || "Usuario";
+        const userName = session.user.user_metadata?.username || userEmail.split('@')[0];
+        
+        authSection.innerHTML = `
+          <div class="user-badge">
+            <span>👋 ${userName}</span>
+          </div>
+          <button onclick="logout()" class="btn">Cerrar Sesión</button>
+        `;
+      } else {
+        // Usuario NO logueado - mostrar login/register
+        authSection.innerHTML = `
+          <a href="login.html" class="login-btn">Iniciar Sesión</a>
+          <a href="register.html" class="btn">Registrarse</a>
+        `;
+      }
+    }
+    
+    // Función para cerrar sesión
+    async function logout() {
+      try {
+        await supabase.auth.signOut();
+        // Redirigir a la página principal
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Error logging out:", error);
+      }
+    }
+    
+    // Inicializar cuando cargue la página
+    document.addEventListener('DOMContentLoaded', updateAuthUI);
+  </script>
 </body>
 </html>
