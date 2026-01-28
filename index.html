@@ -1,66 +1,88 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Atlas Sports</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas Sports - Comunidad de Duck Game</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="icon" href="assets/logo.png" type="image/png">
 </head>
 <body>
+  <!-- Header/Navbar -->
+  <header class="navbar">
+    <div class="brand">
+      <img src="assets/logo.png" class="logo" alt="Logo Atlas Sports">
+      <span>Atlas Sports</span>
+    </div>
 
-<header class="navbar">
-  <div class="brand">
-    <img src="assets/logo.png" class="logo" alt="Atlas Sports"/>
-    <span>Atlas Sports</span>
-  </div>
+    <nav class="menu">
+      <a href="#inicio">Inicio</a>
+      <a href="pages/noticias.html">Noticias</a>
+      <a href="pages/ranked.html">Ranked</a>
+      <a href="pages/torneos.html">Torneos</a>
+      <a href="pages/comunidad.html">Comunidad</a>
+    </nav>
 
-  <nav class="menu">
-    <a href="/noticias">Noticias</a>
-    <a href="/ranked">Ranked</a>
-    <a href="/torneos">Torneos</a>
-    <a href="/mundial">Mundial</a>
-    <a href="/comunidad">Comunidad</a>
-  </nav>
+    <div class="auth">
+      <a href="login.html" class="login-btn">Iniciar Sesión</a>
+      <a href="register.html" class="btn register-btn">Registrarse</a>
+    </div>
+  </header>
 
-  <div class="auth">
-    <a href="#" id="login">Login</a>
-    <a href="#" id="register" class="btn">Register</a>
-  </div>
-</header>
+  <!-- Hero Section -->
+  <main class="hero" id="inicio">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Atlas Sports</h1>
+        <p class="subtitle">
+          Pilar de la comunidad de Duck Game. Lugar donde se reúnen jugadores
+          no solo para socializar sino también para demostrar habilidad.
+        </p>
+        <div class="hero-buttons">
+          <a href="https://discord.gg/7ueUkNj5wX" class="cta discord-btn" target="_blank" rel="noopener">
+            <img src="assets/discord-icon.svg" alt="Discord" class="btn-icon">
+            Únete a nuestro Discord
+          </a>
+          <a href="pages/torneos.html" class="cta secondary-btn">
+            Ver Torneos Activos
+          </a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="assets/hero.png" alt="Comunidad Atlas Sports jugando Duck Game">
+      </div>
+    </div>
+  </main>
 
-<main class="hero">
-  <div class="hero-text">
-    <h1>Atlas Sports</h1>
+  <!-- Sección de características -->
+  <section class="features">
+    <h2>¿Qué ofrecemos?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <h3>🏆 Torneos Regulares</h3>
+        <p>Competencias semanales y mensuales con premios para los mejores jugadores.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📈 Sistema de Ranking</h3>
+        <p>Sigue tu progreso y compite por subir en la tabla de líderes.</p>
+      </div>
+      <div class="feature-card">
+        <h3>👥 Comunidad Activa</h3>
+        <p>+500 jugadores en Discord compartiendo estrategias y organizando partidas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Atlas Sports © 2025 - Comunidad de Duck Game</p>
     <p>
-      Pilar de la comunidad de Duck Game. Lugar donde se reúnen jugadores
-      no solo para socializar sino también para demostrar habilidad.
+      <a href="pages/terminos.html">Términos</a> |
+      <a href="pages/privacidad.html">Privacidad</a> |
+      <a href="https://discord.gg/7ueUkNj5wX" target="_blank" rel="noopener">Contacto</a>
     </p>
-    <a class="cta" href="https://discord.gg/7ueUkNj5wX" target="_blank">
-      Únete a nuestro Discord
-    </a>
-  </div>
+  </footer>
 
-  <div class="hero-image">
-    <img src="assets/hero.png" alt="Comunidad Atlas Sports"/>
-  </div>
-</main>
-
-<script type="module" src="js/supabase.js"></script>
-<script type="module">
-  import { login, register } from './js/auth.js'
-
-  document.getElementById('login').onclick = () => {
-    const email = prompt('Email:')
-    const password = prompt('Password:')
-    login(email, password)
-  }
-
-  document.getElementById('register').onclick = () => {
-    const email = prompt('Email:')
-    const password = prompt('Password:')
-    register(email, password)
-  }
-</script>
-
+  <script src="js/main.js" type="module"></script>
 </body>
 </html>
