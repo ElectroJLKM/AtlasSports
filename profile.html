@@ -1,310 +1,340 @@
-<script>
-  // CONFIGURACIÓN
-  const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil - Atlas Sports</title>
+  <link rel="stylesheet" href="css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* TODOS los estilos del perfil aquí */
+    .profile-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    /* ... (todos los estilos que te pasé antes) ... */
+  </style>
+</head>
+<body>
+  <!-- Mismo navbar que index.html -->
+  <header class="navbar">...</header>
 
-  // FUNCIONES DEL PERFIL
-  async function loadProfileByUsername(username) {
-    try {
-      console.log("Buscando usuario:", username);
-      
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('username', username)
-        .single();
-      
-      if (error) {
-        console.error("Error Supabase:", error);
+  <main class="profile-container" id="profileContainer">
+    <!-- TODO SE CARGA CON JAVASCRIPT -->
+    <div id="loading">
+      <div style="text-align: center; padding: 50px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">🦆</div>
+        <h2>Cargando perfil...</h2>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // CONFIGURACIÓN
+    const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+    // FUNCIONES DEL PERFIL
+    async function loadProfileByUsername(username) {
+      try {
+        console.log("Buscando usuario:", username);
         
-        // Intentar con lowercase si no encuentra
-        const { data: profileLower } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('username', username.toLowerCase())
+          .eq('username', username)
           .single();
         
-        return profileLower;
+        if (error) {
+          console.error("Error Supabase:", error);
+          
+          // Intentar con lowercase si no encuentra
+          const { data: profileLower } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('username', username.toLowerCase())
+            .single();
+          
+          return profileLower;
+        }
+        
+        return profile;
+      } catch (error) {
+        console.error("Error cargando perfil:", error);
+        return null;
+      }
+    }
+  
+    async function renderProfile(profile) {
+      const container = document.getElementById('profileContainer');
+      
+      if (!profile) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 100px 20px;">
+            <h1>❌ Perfil no encontrado</h1>
+            <p>El usuario no existe en la base de datos.</p>
+            <a href="index.html" class="btn" style="margin-top: 20px;">
+              Volver al inicio
+            </a>
+          </div>
+        `;
+        return;
       }
       
-      return profile;
-    } catch (error) {
-      console.error("Error cargando perfil:", error);
-      return null;
-    }
-  }
-
-  async function renderProfile(profile) {
-    const container = document.getElementById('profileContainer');
-    
-    if (!profile) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 100px 20px;">
-          <h1>❌ Perfil no encontrado</h1>
-          <p>El usuario no existe en la base de datos.</p>
-          <a href="index.html" class="btn" style="margin-top: 20px;">
-            Volver al inicio
-          </a>
-        </div>
-      `;
-      return;
-    }
-    
-    console.log("Perfil encontrado:", profile);
-    
-    // Calcular estadísticas
-    const kdRatio = profile.muertes > 0 ? (profile.kills / profile.muertes).toFixed(2) : profile.kills.toFixed(2);
-    const winRate = profile.torneos_participados > 0 
-      ? ((profile.torneos_ganados / profile.torneos_participados) * 100).toFixed(1)
-      : '0.0';
-    
-    container.innerHTML = `
-      <!-- BANNER -->
-      <div class="profile-banner" style="${profile.banner_url ? `background-image: url('${profile.banner_url}'); background-size: cover;` : 'background: linear-gradient(135deg, #1b2838, #2a475e);'}">
-        <div class="banner-overlay">
-          <div class="avatar-container">
-            <div class="profile-avatar">
-              <img src="${profile.avatar_url || 'assets/default-avatar.png'}" 
-                   class="avatar-img" alt="Avatar" 
-                   onerror="this.src='assets/default-avatar.png'">
-              <div class="avatar-frame"></div>
-              <div class="online-status ${profile.is_online ? 'online' : 'offline'}" 
-                   title="${profile.is_online ? 'En línea' : 'Desconectado'}"></div>
-            </div>
-            
-            <div class="profile-info">
-              <h1 class="display-name">${profile.display_name || profile.username}</h1>
-              <div class="username">@${profile.username}</div>
-              <div class="description">${profile.description || 'Jugador de Duck Game'}</div>
-              
-              <!-- INSIGNIAS -->
-              <div class="badges-section">
-                <div class="badges-title">Insignias</div>
-                <div class="badges-container">
-                  ${renderBadges(profile.insignias || [])}
-                </div>
-              </div>
-              
-              <!-- BOTONES -->
-              <div class="profile-actions">
-                <a href="stats.html?u=${profile.username}" class="action-btn">
-                  📊 Ver Estadísticas
-                </a>
-                <a href="config.html?u=${profile.username}" class="action-btn primary">
-                  ⚙️ Configurar Perfil
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      console.log("Perfil encontrado:", profile);
       
-      <!-- CONTENIDO PRINCIPAL -->
-      <div class="profile-layout">
-        <!-- SIDEBAR CON ESTADÍSTICAS -->
-        <aside class="profile-sidebar">
-          <div class="sidebar-section">
-            <h3 class="section-title">🏆 Estadísticas</h3>
-            
-            <div class="stat-card">
-              <div class="stat-row">
-                <span class="stat-label">Torneos Jugados</span>
-                <span class="stat-value">${profile.torneos_participados || 0}</span>
+      // Calcular estadísticas
+      const kdRatio = profile.muertes > 0 ? (profile.kills / profile.muertes).toFixed(2) : profile.kills.toFixed(2);
+      const winRate = profile.torneos_participados > 0 
+        ? ((profile.torneos_ganados / profile.torneos_participados) * 100).toFixed(1)
+        : '0.0';
+      
+      container.innerHTML = `
+        <!-- BANNER -->
+        <div class="profile-banner" style="${profile.banner_url ? `background-image: url('${profile.banner_url}'); background-size: cover;` : 'background: linear-gradient(135deg, #1b2838, #2a475e);'}">
+          <div class="banner-overlay">
+            <div class="avatar-container">
+              <div class="profile-avatar">
+                <img src="${profile.avatar_url || 'assets/default-avatar.png'}" 
+                     class="avatar-img" alt="Avatar" 
+                     onerror="this.src='assets/default-avatar.png'">
+                <div class="avatar-frame"></div>
+                <div class="online-status ${profile.is_online ? 'online' : 'offline'}" 
+                     title="${profile.is_online ? 'En línea' : 'Desconectado'}"></div>
               </div>
-              <div style="height: 6px; background: #2a475e; border-radius: 3px; margin-top: 5px; overflow: hidden;">
-                <div style="height: 100%; background: #66c0f4; width: ${Math.min((profile.torneos_participados || 0) * 3, 100)}%"></div>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-row">
-                <span class="stat-label">Torneos Ganados</span>
-                <span class="stat-value">${profile.torneos_ganados || 0}</span>
-              </div>
-              <div style="color: #8f98a0; font-size: 12px; margin-top: 5px;">
-                Win Rate: ${winRate}%
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-row">
-                <span class="stat-label">Partidas Ganadas</span>
-                <span class="stat-value">${profile.partidas_ganadas || 0}</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-row">
-                <span class="stat-label">Kills Totales</span>
-                <span class="stat-value">${profile.kills || 0}</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-row">
-                <span class="stat-label">K/D Ratio</span>
-                <span class="stat-value">${kdRatio}</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- INFORMACIÓN -->
-          <div class="sidebar-section">
-            <h3 class="section-title">📋 Información</h3>
-            <div class="stat-card">
-              <div class="stat-row">
-                <span class="stat-label">Miembro desde</span>
-                <span class="stat-value">${profile.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES') : 'Hoy'}</span>
-              </div>
-              ${profile.country ? `
-                <div class="stat-row" style="margin-top: 10px;">
-                  <span class="stat-label">País</span>
-                  <span class="stat-value">${profile.country}</span>
+              
+              <div class="profile-info">
+                <h1 class="display-name">${profile.display_name || profile.username}</h1>
+                <div class="username">@${profile.username}</div>
+                <div class="description">${profile.description || 'Jugador de Duck Game'}</div>
+                
+                <!-- INSIGNIAS -->
+                <div class="badges-section">
+                  <div class="badges-title">Insignias</div>
+                  <div class="badges-container">
+                    ${renderBadges(profile.insignias || [])}
+                  </div>
                 </div>
-              ` : ''}
+                
+                <!-- BOTONES -->
+                <div class="profile-actions">
+                  <a href="stats.html?u=${profile.username}" class="action-btn">
+                    📊 Ver Estadísticas
+                  </a>
+                  <a href="config.html?u=${profile.username}" class="action-btn primary">
+                    ⚙️ Configurar Perfil
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-        </aside>
+        </div>
         
         <!-- CONTENIDO PRINCIPAL -->
-        <div class="profile-main">
-          <!-- ACTIVIDAD RECIENTE -->
-          <div class="activity-card" style="background: #1b2838; border-radius: 4px; padding: 20px;">
-            <h3 class="section-title">📅 Actividad Reciente</h3>
-            <div style="color: #8f98a0; padding: 20px; text-align: center;">
-              <div style="font-size: 48px; margin-bottom: 20px;">🎮</div>
-              <p>Bienvenido a tu perfil de Atlas Sports</p>
-              <p style="font-size: 14px; margin-top: 10px;">
-                Participa en torneos para ver tu actividad aquí
-              </p>
+        <div class="profile-layout">
+          <!-- SIDEBAR CON ESTADÍSTICAS -->
+          <aside class="profile-sidebar">
+            <div class="sidebar-section">
+              <h3 class="section-title">🏆 Estadísticas</h3>
+              
+              <div class="stat-card">
+                <div class="stat-row">
+                  <span class="stat-label">Torneos Jugados</span>
+                  <span class="stat-value">${profile.torneos_participados || 0}</span>
+                </div>
+                <div style="height: 6px; background: #2a475e; border-radius: 3px; margin-top: 5px; overflow: hidden;">
+                  <div style="height: 100%; background: #66c0f4; width: ${Math.min((profile.torneos_participados || 0) * 3, 100)}%"></div>
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-row">
+                  <span class="stat-label">Torneos Ganados</span>
+                  <span class="stat-value">${profile.torneos_ganados || 0}</span>
+                </div>
+                <div style="color: #8f98a0; font-size: 12px; margin-top: 5px;">
+                  Win Rate: ${winRate}%
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-row">
+                  <span class="stat-label">Partidas Ganadas</span>
+                  <span class="stat-value">${profile.partidas_ganadas || 0}</span>
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-row">
+                  <span class="stat-label">Kills Totales</span>
+                  <span class="stat-value">${profile.kills || 0}</span>
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-row">
+                  <span class="stat-label">K/D Ratio</span>
+                  <span class="stat-value">${kdRatio}</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- INFORMACIÓN -->
+            <div class="sidebar-section">
+              <h3 class="section-title">📋 Información</h3>
+              <div class="stat-card">
+                <div class="stat-row">
+                  <span class="stat-label">Miembro desde</span>
+                  <span class="stat-value">${profile.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES') : 'Hoy'}</span>
+                </div>
+                ${profile.country ? `
+                  <div class="stat-row" style="margin-top: 10px;">
+                    <span class="stat-label">País</span>
+                    <span class="stat-value">${profile.country}</span>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </aside>
+          
+          <!-- CONTENIDO PRINCIPAL -->
+          <div class="profile-main">
+            <!-- ACTIVIDAD RECIENTE -->
+            <div class="activity-card" style="background: #1b2838; border-radius: 4px; padding: 20px;">
+              <h3 class="section-title">📅 Actividad Reciente</h3>
+              <div style="color: #8f98a0; padding: 20px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">🎮</div>
+                <p>Bienvenido a tu perfil de Atlas Sports</p>
+                <p style="font-size: 14px; margin-top: 10px;">
+                  Participa en torneos para ver tu actividad aquí
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    `;
-    
-    // Actualizar título
-    document.title = `${profile.display_name || profile.username} - Atlas Sports`;
-  }
-
-  function renderBadges(insignias) {
-    if (!insignias || insignias.length === 0) {
-      return '<div style="color: #8f98a0;">Participa en torneos para ganar insignias</div>';
+      `;
+      
+      // Actualizar título
+      document.title = `${profile.display_name || profile.username} - Atlas Sports`;
     }
-    
-    const badgeIcons = {
-      'novato': '🥚', 'experto': '🎮', 'campeon': '🏆',
-      'asesino': '⚔️', 'veterano': '⭐', 'leyenda': '👑',
-      'social': '👥', 'creador': '✨'
-    };
-    
-    return insignias.map(badge => `
-      <div class="badge" title="${badge.charAt(0).toUpperCase() + badge.slice(1)}">
-        <div class="badge-icon" style="font-size: 32px;">${badgeIcons[badge] || '🏅'}</div>
-      </div>
-    `).join('');
-  }
-
-  // AUTENTICACIÓN
-  async function updateAuthUI() {
-    const authSection = document.getElementById('authSection');
-    if (!authSection) return;
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session && session.user) {
-      // Obtener username del perfil
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('id', session.user.id)
-        .single();
+  
+    function renderBadges(insignias) {
+      if (!insignias || insignias.length === 0) {
+        return '<div style="color: #8f98a0;">Participa en torneos para ganar insignias</div>';
+      }
       
-      const userName = profile?.username || 
-                      session.user.user_metadata?.username || 
-                      session.user.email.split('@')[0];
+      const badgeIcons = {
+        'novato': '🥚', 'experto': '🎮', 'campeon': '🏆',
+        'asesino': '⚔️', 'veterano': '⭐', 'leyenda': '👑',
+        'social': '👥', 'creador': '✨'
+      };
       
-      authSection.innerHTML = `
-        <div class="user-badge">
-          <a href="profile.html?u=${userName}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
-            <span>👋 ${userName}</span>
-          </a>
+      return insignias.map(badge => `
+        <div class="badge" title="${badge.charAt(0).toUpperCase() + badge.slice(1)}">
+          <div class="badge-icon" style="font-size: 32px;">${badgeIcons[badge] || '🏅'}</div>
         </div>
-        <button onclick="logout()" class="btn">Cerrar Sesión</button>
-      `;
-    } else {
-      authSection.innerHTML = `
-        <a href="login.html" class="login-btn">Iniciar Sesión</a>
-        <a href="register.html" class="btn">Registrarse</a>
-      `;
+      `).join('');
     }
-  }
-
-  async function logout() {
-    try {
-      await supabase.auth.signOut();
-      window.location.href = "index.html";
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  }
-
-  // INICIALIZACIÓN
-  document.addEventListener('DOMContentLoaded', async () => {
-    console.log("DOM cargado, iniciando profile...");
-    
-    // Actualizar navbar
-    await updateAuthUI();
-    
-    // Obtener username de la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const username = urlParams.get('u');
-    
-    console.log("Username de URL:", username);
-    
-    if (username) {
-      const profile = await loadProfileByUsername(username);
-      console.log("Perfil cargado:", profile);
-      await renderProfile(profile);
-    } else {
-      // Sin parámetros, ver si es el usuario actual
+  
+    // AUTENTICACIÓN
+    async function updateAuthUI() {
+      const authSection = document.getElementById('authSection');
+      if (!authSection) return;
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // Redirigir al perfil del usuario actual
+      
+      if (session && session.user) {
+        // Obtener username del perfil
         const { data: profile } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', session.user.id)
           .single();
         
-        if (profile) {
-          console.log("Redirigiendo a perfil propio:", profile.username);
-          window.location.href = `profile.html?u=${profile.username}`;
+        const userName = profile?.username || 
+                        session.user.user_metadata?.username || 
+                        session.user.email.split('@')[0];
+        
+        authSection.innerHTML = `
+          <div class="user-badge">
+            <a href="profile.html?u=${userName}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+              <span>👋 ${userName}</span>
+            </a>
+          </div>
+          <button onclick="logout()" class="btn">Cerrar Sesión</button>
+        `;
+      } else {
+        authSection.innerHTML = `
+          <a href="login.html" class="login-btn">Iniciar Sesión</a>
+          <a href="register.html" class="btn">Registrarse</a>
+        `;
+      }
+    }
+  
+    async function logout() {
+      try {
+        await supabase.auth.signOut();
+        window.location.href = "index.html";
+      } catch (error) {
+        console.error("Error logging out:", error);
+      }
+    }
+  
+    // INICIALIZACIÓN
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log("DOM cargado, iniciando profile...");
+      
+      // Actualizar navbar
+      await updateAuthUI();
+      
+      // Obtener username de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const username = urlParams.get('u');
+      
+      console.log("Username de URL:", username);
+      
+      if (username) {
+        const profile = await loadProfileByUsername(username);
+        console.log("Perfil cargado:", profile);
+        await renderProfile(profile);
+      } else {
+        // Sin parámetros, ver si es el usuario actual
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // Redirigir al perfil del usuario actual
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile) {
+            console.log("Redirigiendo a perfil propio:", profile.username);
+            window.location.href = `profile.html?u=${profile.username}`;
+          } else {
+            document.getElementById('profileContainer').innerHTML = `
+              <div style="text-align: center; padding: 100px 20px;">
+                <h1>⚠️ Perfil no creado</h1>
+                <p>Tu cuenta se creó pero no se generó tu perfil.</p>
+                <p>Contacta con administración.</p>
+                <a href="index.html" class="btn" style="margin-top: 20px;">
+                  Volver al inicio
+                </a>
+              </div>
+            `;
+          }
         } else {
+          // Mostrar error
           document.getElementById('profileContainer').innerHTML = `
             <div style="text-align: center; padding: 100px 20px;">
-              <h1>⚠️ Perfil no creado</h1>
-              <p>Tu cuenta se creó pero no se generó tu perfil.</p>
-              <p>Contacta con administración.</p>
+              <h1>🔍 Especifica un usuario</h1>
+              <p>Usa: profile.html?u=nombreusuario</p>
               <a href="index.html" class="btn" style="margin-top: 20px;">
                 Volver al inicio
               </a>
             </div>
           `;
         }
-      } else {
-        // Mostrar error
-        document.getElementById('profileContainer').innerHTML = `
-          <div style="text-align: center; padding: 100px 20px;">
-            <h1>🔍 Especifica un usuario</h1>
-            <p>Usa: profile.html?u=nombreusuario</p>
-            <a href="index.html" class="btn" style="margin-top: 20px;">
-              Volver al inicio
-            </a>
-          </div>
-        `;
       }
-    }
-  });
-</script>
+    });
+  </script>
+</body>
+</html>
