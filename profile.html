@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil - Atlas Sports</title>
+  <link rel="stylesheet" href="css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* TODOS los estilos del perfil aquí */
+    .profile-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    /* ... (todos los estilos que te pasé antes) ... */
+  </style>
+</head>
+<body>
+  <!-- Mismo navbar que index.html -->
+  <header class="navbar">...</header>
+
+  <main class="profile-container" id="profileContainer">
+    <!-- TODO SE CARGA CON JAVASCRIPT -->
+    <div id="loading">
+      <div style="text-align: center; padding: 50px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">🦆</div>
+        <h2>Cargando perfil...</h2>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 1. CONFIGURAR SUPABASE
+    const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 2. OBTENER USERID DE LA URL
+    function getUserIdFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('user');
+      
+      // Si no hay ?user= en la URL, intentar obtener de la ruta
+      if (!userId) {
+        // Podrías usar: /profile/username en el futuro
+        const path = window.location.pathname.split('/');
+        // Para URLs como /profile.html?user=USER_ID
+        return null;
+      }
+      
+      return userId;
+    }
+
+    // 3. OBTENER USERNAME Y BUSCAR SU ID
+    async function getUserIdFromUsername(username) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', username.toLowerCase())
+          .single();
+        
+        if (error) throw error;
+        return data.id;
+      } catch (error) {
+        console.error('Usuario no encontrado:', error);
+        return null;
+      }
+    }
+
+    // 4. CARGAR PERFIL POR USERNAME (URL AMIGABLE)
+    async function loadProfileByUsername(username) {
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('username', username.toLowerCase())
+          .single();
+        
+        if (error) throw error;
+        return profile;
+      } catch (error) {
+        console.error('Error cargando perfil:', error);
+        return null;
+      }
+    }
+
+    // 5. RENDERIZAR PERFIL COMPLETO
+    async function renderProfile(profile) {
+      const container = document.getElementById('profileContainer');
+      
+      // Actualizar título
+      document.title = `${profile.display_name || profile.username} - Atlas Sports`;
+      
+      // Generar HTML del perfil
+      container.innerHTML = `
+        <!-- BANNER -->
+        <div class="profile-banner">
+          <div class="banner-overlay">
+            <div class="avatar-container">
+              <div class="profile-avatar">
+                <img src="${profile.avatar_url || 'assets/default-avatar.png'}" 
+                     class="avatar-img" alt="Avatar">
+                <div class="avatar-frame"></div>
+                <div class="online-status ${profile.is_online ? 'online' : 'offline'}"></div>
+              </div>
+              
+              <div class="profile-info">
+                <h1 class="display-name">${profile.display_name || profile.username}</h1>
+                <div class="username">@${profile.username}</div>
+                <div class="description">${profile.description || 'Sin descripción'}</div>
+                
+                <!-- INSIGNIAS -->
+                <div class="badges-section">
+                  <div class="badges-title">Insignias</div>
+                  <div class="badges-container" id="badgesContainer">
+                    ${renderBadges(profile.insignias || [])}
+                  </div>
+                </div>
+                
+                <!-- BOTONES -->
+                <div class="profile-actions">
+                  <button class="action-btn" onclick="location.href='stats.html?user=${profile.id}'">
+                    📊 Ver Estadísticas
+                  </button>
+                  <button class="action-btn primary" onclick="addFriend('${profile.id}')">
+                    👥 Agregar Amigo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="profile-layout">
+          <aside class="profile-sidebar">
+            <div class="sidebar-section">
+              <h3 class="section-title">🏆 Estadísticas</h3>
+              ${renderStats(profile)}
+            </div>
+          </aside>
+          
+          <div class="profile-main">
+            <div class="activity-card">
+              <h3 class="section-title">📅 Actividad Reciente</h3>
+              ${renderRecentActivity()}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 6. FUNCIONES AUXILIARES
+    function renderBadges(insignias) {
+      if (!insignias.length) return '<div style="color: #8f98a0;">Sin insignias aún</div>';
+      
+      const badgeIcons = {
+        'novato': '🥚', 'experto': '🎮', 'campeon': '🏆',
+        'asesino': '⚔️', 'veterano': '⭐', 'leyenda': '👑'
+      };
+      
+      return insignias.map(badge => `
+        <div class="badge">
+          <div class="badge-icon">${badgeIcons[badge] || '🏅'}</div>
+          <div class="badge-tooltip">${badge.charAt(0).toUpperCase() + badge.slice(1)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderStats(profile) {
+      const kdRatio = profile.muertes > 0 ? (profile.kills / profile.muertes).toFixed(2) : '0.00';
+      
+      return `
+        <div class="stat-card">
+          <div class="stat-row">
+            <span class="stat-label">Torneos Jugados</span>
+            <span class="stat-value">${profile.torneos_participados || 0}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-row">
+            <span class="stat-label">Torneos Ganados</span>
+            <span class="stat-value">${profile.torneos_ganados || 0}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-row">
+            <span class="stat-label">Partidas Ganadas</span>
+            <span class="stat-value">${profile.partidas_ganadas || 0}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-row">
+            <span class="stat-label">K/D Ratio</span>
+            <span class="stat-value">${kdRatio}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRecentActivity() {
+      return `
+        <div class="activity-item">
+          <div class="activity-icon">🎮</div>
+          <div class="activity-text">Última partida jugada</div>
+          <div class="activity-time">Hoy</div>
+        </div>
+      `;
+    }
+
+    // 7. INICIALIZACIÓN
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Obtener parámetro de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const username = urlParams.get('u');  // Ejemplo: profile.html?u=nombreusuario
+      const userId = urlParams.get('id');   // O por ID: profile.html?id=UUID
+      
+      let profile = null;
+      
+      if (username) {
+        // Cargar por username
+        profile = await loadProfileByUsername(username);
+      } else if (userId) {
+        // Cargar por ID
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        profile = data;
+      } else {
+        // Sin parámetros, mostrar error o perfil del usuario actual
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // Redirigir al perfil del usuario actual
+          const { data: userProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (userProfile) {
+            // Actualizar URL sin recargar
+            window.history.replaceState({}, '', `?u=${userProfile.username}`);
+            profile = userProfile;
+          }
+        } else {
+          // Mostrar página de error
+          document.getElementById('profileContainer').innerHTML = `
+            <div style="text-align: center; padding: 100px 20px;">
+              <h1>🦆 Perfil no encontrado</h1>
+              <p>Este perfil no existe o fue eliminado.</p>
+              <a href="index.html" class="btn" style="margin-top: 20px;">
+                Volver al inicio
+              </a>
+            </div>
+          `;
+          return;
+        }
+      }
+      
+      if (profile) {
+        await renderProfile(profile);
+      }
+    });
+
+    // 8. FUNCIONES GLOBALES
+    async function addFriend(userId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        alert('Inicia sesión para agregar amigos');
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Implementar lógica de amigos aquí
+      alert('Sistema de amigos en desarrollo');
+    }
+  </script>
+</body>
+</html>
