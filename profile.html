@@ -1,557 +1,310 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil - Atlas Sports</title>
-  <link rel="stylesheet" href="css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    /* ESTILOS TIPO STEAM */
-    :root {
-      --steam-dark: #1b2838;
-      --steam-blue: #66c0f4;
-      --steam-light: #2a475e;
-      --steam-green: #5ba32b;
-      --steam-orange: #e6a336;
-      --steam-red: #a34c25;
-    }
-    
-    .profile-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    /* BANNER */
-    .profile-banner {
-      height: 250px;
-      background: linear-gradient(135deg, var(--steam-dark), var(--steam-light));
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    
-    .banner-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .banner-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.8));
-      padding: 30px;
-    }
-    
-    /* AVATAR */
-    .avatar-container {
-      display: flex;
-      align-items: flex-end;
-      gap: 20px;
-    }
-    
-    .profile-avatar {
-      width: 184px;
-      height: 184px;
-      border-radius: 4px;
-      border: 4px solid rgba(255,255,255,0.1);
-      background: var(--steam-dark);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .avatar-frame {
-      position: absolute;
-      top: -4px;
-      left: -4px;
-      right: -4px;
-      bottom: -4px;
-      border: 2px solid var(--steam-blue);
-      border-radius: 6px;
-      pointer-events: none;
-    }
-    
-    .avatar-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .online-status {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 2px solid var(--steam-dark);
-    }
-    
-    .online { background: var(--steam-green); }
-    .offline { background: #666; }
-    
-    /* INFO */
-    .profile-info {
-      flex: 1;
-    }
-    
-    .display-name {
-      font-size: 32px;
-      font-weight: bold;
-      color: white;
-      margin-bottom: 5px;
-    }
-    
-    .username {
-      color: #8f98a0;
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-    
-    .description {
-      color: #c6d4df;
-      font-size: 14px;
-      line-height: 1.5;
-      max-width: 600px;
-      margin-bottom: 20px;
-    }
-    
-    /* INSIGNIAS */
-    .badges-section {
-      margin-top: 20px;
-    }
-    
-    .badges-title {
-      color: #c6d4df;
-      font-size: 14px;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-    
-    .badges-container {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    
-    .badge {
-      width: 64px;
-      height: 64px;
-      border-radius: 4px;
-      background: var(--steam-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      transition: transform 0.2s;
-    }
-    
-    .badge:hover {
-      transform: scale(1.1);
-    }
-    
-    .badge-icon {
-      width: 48px;
-      height: 48px;
-      object-fit: contain;
-    }
-    
-    /* LAYOUT */
-    .profile-layout {
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 20px;
-    }
-    
-    /* SIDEBAR */
-    .profile-sidebar {
-      background: var(--steam-dark);
-      border-radius: 4px;
-      padding: 20px;
-    }
-    
-    .sidebar-section {
-      margin-bottom: 30px;
-    }
-    
-    .section-title {
-      color: #66c0f4;
-      font-size: 16px;
-      margin-bottom: 15px;
-      padding-bottom: 5px;
-      border-bottom: 1px solid #2a475e;
-    }
-    
-    /* STATS */
-    .stat-card {
-      background: rgba(42, 71, 94, 0.5);
-      border-radius: 4px;
-      padding: 15px;
-      margin-bottom: 10px;
-    }
-    
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    
-    .stat-label {
-      color: #c6d4df;
-      font-size: 14px;
-    }
-    
-    .stat-value {
-      color: white;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    
-    /* BOTONES */
-    .profile-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    
-    .action-btn {
-      padding: 8px 16px;
-      border-radius: 4px;
-      background: rgba(102, 192, 244, 0.2);
-      color: #66c0f4;
-      border: 1px solid #66c0f4;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: inline-block;
-    }
-    
-    .action-btn:hover {
-      background: rgba(102, 192, 244, 0.4);
-    }
-    
-    .action-btn.primary {
-      background: #66c0f4;
-      color: #1b2838;
-    }
-    
-    .action-btn.primary:hover {
-      background: #4da8e0;
-    }
-    
-    /* RESPONSIVE */
-    @media (max-width: 900px) {
-      .profile-layout {
-        grid-template-columns: 1fr;
-      }
-      
-      .banner-overlay {
-        padding: 15px;
-      }
-      
-      .avatar-container {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .profile-avatar {
-        width: 128px;
-        height: 128px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- NAVBAR (igual que index.html) -->
-  <header class="navbar">
-    <div class="brand">
-      <img src="assets/logo.png" class="logo" alt="Logo Atlas Sports">
-      <a href="index.html" style="color: inherit; text-decoration: none;">
-        <span>Atlas Sports</span>
-      </a>
-    </div>
-    <nav class="menu">
-      <a href="index.html">Inicio</a>
-      <a href="noticias.html">Noticias</a>
-      <a href="ranked.html">Ranked</a>
-      <a href="torneos.html">Torneos</a>
-      <a href="comunidad.html">Comunidad</a>
-    </nav>
-    <div class="auth" id="authSection">
-      <!-- Se carga con JavaScript -->
-    </div>
-  </header>
+<script>
+  // CONFIGURACIÓN
+  const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  <!-- PERFIL -->
-  <main class="profile-container" id="profileContainer">
-    <!-- Se carga dinámicamente -->
-    <div id="loading">
-      <div style="text-align: center; padding: 100px 20px;">
-        <div style="font-size: 48px; margin-bottom: 20px;">🦆</div>
-        <h2>Cargando perfil...</h2>
-      </div>
-    </div>
-  </main>
-
-  <script>
-    // CONFIGURACIÓN
-    const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // FUNCIONES DEL PERFIL
-    async function loadProfileByUsername(username) {
-      try {
-        const { data: profile, error } = await supabase
+  // FUNCIONES DEL PERFIL
+  async function loadProfileByUsername(username) {
+    try {
+      console.log("Buscando usuario:", username);
+      
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('username', username)
+        .single();
+      
+      if (error) {
+        console.error("Error Supabase:", error);
+        
+        // Intentar con lowercase si no encuentra
+        const { data: profileLower } = await supabase
           .from('profiles')
           .select('*')
           .eq('username', username.toLowerCase())
           .single();
         
-        if (error) throw error;
-        return profile;
-      } catch (error) {
-        console.error('Error cargando perfil:', error);
-        return null;
-      }
-    }
-
-    function renderBadges(insignias) {
-      if (!insignias || insignias.length === 0) {
-        return '<div style="color: #8f98a0;">Sin insignias aún</div>';
+        return profileLower;
       }
       
-      const badgeIcons = {
-        'novato': '🥚', 'experto': '🎮', 'campeon': '🏆',
-        'asesino': '⚔️', 'veterano': '⭐', 'leyenda': '👑'
-      };
-      
-      return insignias.map(badge => `
-        <div class="badge">
-          <div class="badge-icon">${badgeIcons[badge] || '🏅'}</div>
-        </div>
-      `).join('');
+      return profile;
+    } catch (error) {
+      console.error("Error cargando perfil:", error);
+      return null;
     }
+  }
 
-    async function renderProfile(profile) {
-      const container = document.getElementById('profileContainer');
-      
-      // Calcular K/D Ratio
-      const kills = profile.kills || 0;
-      const muertes = profile.muertes || 1;
-      const kdRatio = (kills / muertes).toFixed(2);
-      
+  async function renderProfile(profile) {
+    const container = document.getElementById('profileContainer');
+    
+    if (!profile) {
       container.innerHTML = `
-        <!-- BANNER -->
-        <div class="profile-banner" style="${profile.banner_url ? `background-image: url('${profile.banner_url}'); background-size: cover;` : ''}">
-          <div class="banner-overlay">
-            <div class="avatar-container">
-              <div class="profile-avatar">
-                <img src="${profile.avatar_url || 'assets/default-avatar.png'}" 
-                     class="avatar-img" alt="Avatar">
-                <div class="avatar-frame"></div>
-                <div class="online-status ${profile.is_online ? 'online' : 'offline'}"></div>
+        <div style="text-align: center; padding: 100px 20px;">
+          <h1>❌ Perfil no encontrado</h1>
+          <p>El usuario no existe en la base de datos.</p>
+          <a href="index.html" class="btn" style="margin-top: 20px;">
+            Volver al inicio
+          </a>
+        </div>
+      `;
+      return;
+    }
+    
+    console.log("Perfil encontrado:", profile);
+    
+    // Calcular estadísticas
+    const kdRatio = profile.muertes > 0 ? (profile.kills / profile.muertes).toFixed(2) : profile.kills.toFixed(2);
+    const winRate = profile.torneos_participados > 0 
+      ? ((profile.torneos_ganados / profile.torneos_participados) * 100).toFixed(1)
+      : '0.0';
+    
+    container.innerHTML = `
+      <!-- BANNER -->
+      <div class="profile-banner" style="${profile.banner_url ? `background-image: url('${profile.banner_url}'); background-size: cover;` : 'background: linear-gradient(135deg, #1b2838, #2a475e);'}">
+        <div class="banner-overlay">
+          <div class="avatar-container">
+            <div class="profile-avatar">
+              <img src="${profile.avatar_url || 'assets/default-avatar.png'}" 
+                   class="avatar-img" alt="Avatar" 
+                   onerror="this.src='assets/default-avatar.png'">
+              <div class="avatar-frame"></div>
+              <div class="online-status ${profile.is_online ? 'online' : 'offline'}" 
+                   title="${profile.is_online ? 'En línea' : 'Desconectado'}"></div>
+            </div>
+            
+            <div class="profile-info">
+              <h1 class="display-name">${profile.display_name || profile.username}</h1>
+              <div class="username">@${profile.username}</div>
+              <div class="description">${profile.description || 'Jugador de Duck Game'}</div>
+              
+              <!-- INSIGNIAS -->
+              <div class="badges-section">
+                <div class="badges-title">Insignias</div>
+                <div class="badges-container">
+                  ${renderBadges(profile.insignias || [])}
+                </div>
               </div>
               
-              <div class="profile-info">
-                <h1 class="display-name">${profile.display_name || profile.username}</h1>
-                <div class="username">@${profile.username}</div>
-                <div class="description">${profile.description || 'Sin descripción'}</div>
-                
-                <!-- INSIGNIAS -->
-                <div class="badges-section">
-                  <div class="badges-title">Insignias</div>
-                  <div class="badges-container">
-                    ${renderBadges(profile.insignias || [])}
-                  </div>
-                </div>
-                
-                <!-- BOTONES -->
-                <div class="profile-actions">
-                  <a href="stats.html?u=${profile.username}" class="action-btn">
-                    📊 Ver Estadísticas
-                  </a>
-                  <a href="config.html?u=${profile.username}" class="action-btn primary">
-                    ⚙️ Configurar Perfil
-                  </a>
-                </div>
+              <!-- BOTONES -->
+              <div class="profile-actions">
+                <a href="stats.html?u=${profile.username}" class="action-btn">
+                  📊 Ver Estadísticas
+                </a>
+                <a href="config.html?u=${profile.username}" class="action-btn primary">
+                  ⚙️ Configurar Perfil
+                </a>
               </div>
             </div>
           </div>
         </div>
-        
-        <!-- CONTENIDO PRINCIPAL -->
-        <div class="profile-layout">
-          <!-- SIDEBAR CON ESTADÍSTICAS -->
-          <aside class="profile-sidebar">
-            <div class="sidebar-section">
-              <h3 class="section-title">🏆 Estadísticas</h3>
-              
-              <div class="stat-card">
-                <div class="stat-row">
-                  <span class="stat-label">Torneos Jugados</span>
-                  <span class="stat-value">${profile.torneos_participados || 0}</span>
-                </div>
+      </div>
+      
+      <!-- CONTENIDO PRINCIPAL -->
+      <div class="profile-layout">
+        <!-- SIDEBAR CON ESTADÍSTICAS -->
+        <aside class="profile-sidebar">
+          <div class="sidebar-section">
+            <h3 class="section-title">🏆 Estadísticas</h3>
+            
+            <div class="stat-card">
+              <div class="stat-row">
+                <span class="stat-label">Torneos Jugados</span>
+                <span class="stat-value">${profile.torneos_participados || 0}</span>
               </div>
-              
-              <div class="stat-card">
-                <div class="stat-row">
-                  <span class="stat-label">Torneos Ganados</span>
-                  <span class="stat-value">${profile.torneos_ganados || 0}</span>
-                </div>
-              </div>
-              
-              <div class="stat-card">
-                <div class="stat-row">
-                  <span class="stat-label">Partidas Ganadas</span>
-                  <span class="stat-value">${profile.partidas_ganadas || 0}</span>
-                </div>
-              </div>
-              
-              <div class="stat-card">
-                <div class="stat-row">
-                  <span class="stat-label">Kills Totales</span>
-                  <span class="stat-value">${profile.kills || 0}</span>
-                </div>
-              </div>
-              
-              <div class="stat-card">
-                <div class="stat-row">
-                  <span class="stat-label">K/D Ratio</span>
-                  <span class="stat-value">${kdRatio}</span>
-                </div>
+              <div style="height: 6px; background: #2a475e; border-radius: 3px; margin-top: 5px; overflow: hidden;">
+                <div style="height: 100%; background: #66c0f4; width: ${Math.min((profile.torneos_participados || 0) * 3, 100)}%"></div>
               </div>
             </div>
             
-            <!-- INFORMACIÓN -->
-            <div class="sidebar-section">
-              <h3 class="section-title">📋 Información</h3>
-              <div class="stat-card">
-                <div class="stat-row">
-                  <span class="stat-label">Miembro desde</span>
-                  <span class="stat-value">${profile.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES') : '-'}</span>
-                </div>
+            <div class="stat-card">
+              <div class="stat-row">
+                <span class="stat-label">Torneos Ganados</span>
+                <span class="stat-value">${profile.torneos_ganados || 0}</span>
+              </div>
+              <div style="color: #8f98a0; font-size: 12px; margin-top: 5px;">
+                Win Rate: ${winRate}%
               </div>
             </div>
-          </aside>
-          
-          <!-- CONTENIDO PRINCIPAL -->
-          <div class="profile-main">
-            <!-- ACTIVIDAD RECIENTE -->
-            <div class="activity-card" style="background: var(--steam-dark); border-radius: 4px; padding: 20px;">
-              <h3 class="section-title">📅 Actividad Reciente</h3>
-              <div style="color: #8f98a0; text-align: center; padding: 40px;">
-                No hay actividad reciente
+            
+            <div class="stat-card">
+              <div class="stat-row">
+                <span class="stat-label">Partidas Ganadas</span>
+                <span class="stat-value">${profile.partidas_ganadas || 0}</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-row">
+                <span class="stat-label">Kills Totales</span>
+                <span class="stat-value">${profile.kills || 0}</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-row">
+                <span class="stat-label">K/D Ratio</span>
+                <span class="stat-value">${kdRatio}</span>
               </div>
             </div>
           </div>
+          
+          <!-- INFORMACIÓN -->
+          <div class="sidebar-section">
+            <h3 class="section-title">📋 Información</h3>
+            <div class="stat-card">
+              <div class="stat-row">
+                <span class="stat-label">Miembro desde</span>
+                <span class="stat-value">${profile.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES') : 'Hoy'}</span>
+              </div>
+              ${profile.country ? `
+                <div class="stat-row" style="margin-top: 10px;">
+                  <span class="stat-label">País</span>
+                  <span class="stat-value">${profile.country}</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </aside>
+        
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="profile-main">
+          <!-- ACTIVIDAD RECIENTE -->
+          <div class="activity-card" style="background: #1b2838; border-radius: 4px; padding: 20px;">
+            <h3 class="section-title">📅 Actividad Reciente</h3>
+            <div style="color: #8f98a0; padding: 20px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 20px;">🎮</div>
+              <p>Bienvenido a tu perfil de Atlas Sports</p>
+              <p style="font-size: 14px; margin-top: 10px;">
+                Participa en torneos para ver tu actividad aquí
+              </p>
+            </div>
+          </div>
         </div>
-      `;
-      
-      // Actualizar título
-      document.title = `${profile.display_name || profile.username} - Atlas Sports`;
-    }
+      </div>
+    `;
+    
+    // Actualizar título
+    document.title = `${profile.display_name || profile.username} - Atlas Sports`;
+  }
 
-    // AUTENTICACIÓN (igual que index.html)
-    async function updateAuthUI() {
-      const authSection = document.getElementById('authSection');
-      if (!authSection) return;
+  function renderBadges(insignias) {
+    if (!insignias || insignias.length === 0) {
+      return '<div style="color: #8f98a0;">Participa en torneos para ganar insignias</div>';
+    }
+    
+    const badgeIcons = {
+      'novato': '🥚', 'experto': '🎮', 'campeon': '🏆',
+      'asesino': '⚔️', 'veterano': '⭐', 'leyenda': '👑',
+      'social': '👥', 'creador': '✨'
+    };
+    
+    return insignias.map(badge => `
+      <div class="badge" title="${badge.charAt(0).toUpperCase() + badge.slice(1)}">
+        <div class="badge-icon" style="font-size: 32px;">${badgeIcons[badge] || '🏅'}</div>
+      </div>
+    `).join('');
+  }
+
+  // AUTENTICACIÓN
+  async function updateAuthUI() {
+    const authSection = document.getElementById('authSection');
+    if (!authSection) return;
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session && session.user) {
+      // Obtener username del perfil
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', session.user.id)
+        .single();
       
+      const userName = profile?.username || 
+                      session.user.user_metadata?.username || 
+                      session.user.email.split('@')[0];
+      
+      authSection.innerHTML = `
+        <div class="user-badge">
+          <a href="profile.html?u=${userName}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+            <span>👋 ${userName}</span>
+          </a>
+        </div>
+        <button onclick="logout()" class="btn">Cerrar Sesión</button>
+      `;
+    } else {
+      authSection.innerHTML = `
+        <a href="login.html" class="login-btn">Iniciar Sesión</a>
+        <a href="register.html" class="btn">Registrarse</a>
+      `;
+    }
+  }
+
+  async function logout() {
+    try {
+      await supabase.auth.signOut();
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  }
+
+  // INICIALIZACIÓN
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log("DOM cargado, iniciando profile...");
+    
+    // Actualizar navbar
+    await updateAuthUI();
+    
+    // Obtener username de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('u');
+    
+    console.log("Username de URL:", username);
+    
+    if (username) {
+      const profile = await loadProfileByUsername(username);
+      console.log("Perfil cargado:", profile);
+      await renderProfile(profile);
+    } else {
+      // Sin parámetros, ver si es el usuario actual
       const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session && session.user) {
+      if (session) {
+        // Redirigir al perfil del usuario actual
         const { data: profile } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', session.user.id)
           .single();
         
-        const userName = profile?.username || session.user.user_metadata?.username || session.user.email.split('@')[0];
-        
-        authSection.innerHTML = `
-          <div class="user-badge">
-            <a href="profile.html?u=${userName}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
-              <span>👋 ${userName}</span>
+        if (profile) {
+          console.log("Redirigiendo a perfil propio:", profile.username);
+          window.location.href = `profile.html?u=${profile.username}`;
+        } else {
+          document.getElementById('profileContainer').innerHTML = `
+            <div style="text-align: center; padding: 100px 20px;">
+              <h1>⚠️ Perfil no creado</h1>
+              <p>Tu cuenta se creó pero no se generó tu perfil.</p>
+              <p>Contacta con administración.</p>
+              <a href="index.html" class="btn" style="margin-top: 20px;">
+                Volver al inicio
+              </a>
+            </div>
+          `;
+        }
+      } else {
+        // Mostrar error
+        document.getElementById('profileContainer').innerHTML = `
+          <div style="text-align: center; padding: 100px 20px;">
+            <h1>🔍 Especifica un usuario</h1>
+            <p>Usa: profile.html?u=nombreusuario</p>
+            <a href="index.html" class="btn" style="margin-top: 20px;">
+              Volver al inicio
             </a>
           </div>
-          <button onclick="logout()" class="btn">Cerrar Sesión</button>
-        `;
-      } else {
-        authSection.innerHTML = `
-          <a href="login.html" class="login-btn">Iniciar Sesión</a>
-          <a href="register.html" class="btn">Registrarse</a>
         `;
       }
     }
-
-    async function logout() {
-      try {
-        await supabase.auth.signOut();
-        window.location.href = "index.html";
-      } catch (error) {
-        console.error("Error logging out:", error);
-      }
-    }
-
-    // INICIALIZACIÓN
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Actualizar navbar
-      await updateAuthUI();
-      
-      // Obtener username de la URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const username = urlParams.get('u');
-      
-      if (username) {
-        const profile = await loadProfileByUsername(username);
-        if (profile) {
-          await renderProfile(profile);
-        } else {
-          document.getElementById('profileContainer').innerHTML = `
-            <div style="text-align: center; padding: 100px 20px;">
-              <h1>🦆 Perfil no encontrado</h1>
-              <p>El usuario "@${username}" no existe.</p>
-              <a href="index.html" class="btn" style="margin-top: 20px;">
-                Volver al inicio
-              </a>
-            </div>
-          `;
-        }
-      } else {
-        // Sin parámetros, ver si es el usuario actual
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          // Redirigir al perfil del usuario actual
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (profile) {
-            window.location.href = `profile.html?u=${profile.username}`;
-          }
-        } else {
-          // Mostrar error
-          document.getElementById('profileContainer').innerHTML = `
-            <div style="text-align: center; padding: 100px 20px;">
-              <h1>🔍 Perfil no especificado</h1>
-              <p>Debes especificar un usuario: profile.html?u=nombreusuario</p>
-              <a href="index.html" class="btn" style="margin-top: 20px;">
-                Volver al inicio
-              </a>
-            </div>
-          `;
-        }
-      }
-    });
-  </script>
-</body>
-</html>
+  });
+</script>
