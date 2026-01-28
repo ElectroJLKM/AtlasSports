@@ -1,1 +1,66 @@
-<h1>jejeje holaaaa</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Atlas Sports</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="brand">
+    <img src="assets/logo.png" class="logo" alt="Atlas Sports"/>
+    <span>Atlas Sports</span>
+  </div>
+
+  <nav class="menu">
+    <a href="/noticias">Noticias</a>
+    <a href="/ranked">Ranked</a>
+    <a href="/torneos">Torneos</a>
+    <a href="/mundial">Mundial</a>
+    <a href="/comunidad">Comunidad</a>
+  </nav>
+
+  <div class="auth">
+    <a href="#" id="login">Login</a>
+    <a href="#" id="register" class="btn">Register</a>
+  </div>
+</header>
+
+<main class="hero">
+  <div class="hero-text">
+    <h1>Atlas Sports</h1>
+    <p>
+      Pilar de la comunidad de Duck Game. Lugar donde se reúnen jugadores
+      no solo para socializar sino también para demostrar habilidad.
+    </p>
+    <a class="cta" href="https://discord.gg/7ueUkNj5wX" target="_blank">
+      Únete a nuestro Discord
+    </a>
+  </div>
+
+  <div class="hero-image">
+    <img src="assets/hero.png" alt="Comunidad Atlas Sports"/>
+  </div>
+</main>
+
+<script type="module" src="js/supabase.js"></script>
+<script type="module">
+  import { login, register } from './js/auth.js'
+
+  document.getElementById('login').onclick = () => {
+    const email = prompt('Email:')
+    const password = prompt('Password:')
+    login(email, password)
+  }
+
+  document.getElementById('register').onclick = () => {
+    const email = prompt('Email:')
+    const password = prompt('Password:')
+    register(email, password)
+  }
+</script>
+
+</body>
+</html>
