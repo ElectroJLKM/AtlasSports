@@ -8,6 +8,8 @@
   
   <!-- Cargar Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  <!-- CONFIGURACIÓN CENTRALIZADA -->
+  <script src="js/config.js"></script>
   
   <style>
     .auth-container {
@@ -210,11 +212,8 @@
   </main>
 
   <script>
-    // CONFIGURACIÓN SUPABASE (usa tus claves)
-    const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Obtener cliente Supabase desde config.js
+    const supabase = getSupabaseClient();
     
     // Verificar si el username está disponible
     async function checkUsernameAvailability(username) {
@@ -223,12 +222,11 @@
       }
       
       try {
-        // Verificar en la tabla profiles (usando RLS - select_public_profiles)
         const { data, error } = await supabase
           .from('profiles')
           .select('username')
           .eq('username', username)
-          .maybeSingle();  // Devuelve null si no existe
+          .maybeSingle();
         
         if (error) throw error;
         
@@ -300,15 +298,13 @@
           password: password,
           options: {
             data: {
-              username: username  // Esto va a user_metadata
+              username: username
             },
-            // URL a la que redirige después de confirmar email
             emailRedirectTo: `https://electrojlkm.github.io/AtlasSports/login.html?verified=true`
           }
         });
         
         if (authError) {
-          // Manejar errores comunes
           let errorMsg = authError.message;
           
           if (authError.message.includes('already registered')) {
@@ -324,13 +320,10 @@
         
         // 5. Registro exitoso
         if (authData.user) {
-          // MOSTRAR MENSAJE DE ÉXITO
           successElement.innerHTML = `
             <strong>¡Cuenta creada exitosamente!</strong><br><br>
-            
             📧 <strong>Revisa tu email para confirmar la cuenta.</strong><br>
             Hemos enviado un enlace de confirmación a: <strong>${email}</strong><br><br>
-            
             <small style="color: #94a3b8;">
               ¿No ves el email? Revisa tu carpeta de spam.<br>
               El enlace expira en 24 horas.
@@ -370,7 +363,6 @@
         return;
       }
       
-      // Validar formato
       const validFormat = /^[a-zA-Z0-9_]+$/.test(username);
       if (!validFormat) {
         statusElement.textContent = "Solo letras, números y _";
@@ -378,11 +370,9 @@
         return;
       }
       
-      // Mostrar "verificando..."
       statusElement.textContent = "Verificando...";
       statusElement.className = "";
       
-      // Verificar disponibilidad
       const result = await checkUsernameAvailability(username);
       
       if (result.available) {
