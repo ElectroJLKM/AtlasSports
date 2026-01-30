@@ -1,225 +1,67 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba Supabase - Atlas Sports</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f172a;
-            color: white;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .card {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border: 1px solid #334155;
-        }
-        button {
-            background: #5865f2;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 10px 5px;
-        }
-        button:hover {
-            background: #4752c4;
-        }
-        .success {
-            color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-        }
-        .error {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 10px;
-            border-radius: 6px;
-            margin: 10px 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #334155;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background: #334155;
-        }
-        pre {
-            background: #0f172a;
-            padding: 10px;
-            border-radius: 6px;
-            overflow: auto;
-            font-size: 12px;
-        }
-    </style>
+    <title>Test Supabase</title>
 </head>
 <body>
-    <h1>🔍 Prueba de Conexión Supabase</h1>
-    
-    <div class="card">
-        <h2>1. Configuración</h2>
-        <p><strong>URL:</strong> https://uqffsnrhasfqfcswkncf.supabase.co</p>
-        <p><strong>Tabla a consultar:</strong> events</p>
-        
-        <button onclick="testConnection()">Probar Conexión</button>
-        <button onclick="listTables()">Listar Tablas Disponibles</button>
-        <button onclick="getEvents()">Obtener Eventos</button>
-        
-        <div id="result" class="success" style="display: none;"></div>
-    </div>
-    
-    <div class="card">
-        <h2>2. Resultados</h2>
-        <div id="output"></div>
-    </div>
-    
+    <h1>Test Supabase</h1>
+    <button onclick="test()">Test Conexión</button>
+    <button onclick="getEvents()">Get Events</button>
+    <div id="result"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        function showMessage(text, isError = false) {
+        async function test() {
             const resultDiv = document.getElementById('result');
-            resultDiv.textContent = text;
-            resultDiv.className = isError ? 'error' : 'success';
-            resultDiv.style.display = 'block';
-        }
-        
-        async function testConnection() {
+            resultDiv.innerHTML = "Probando conexión...";
+            
             try {
-                showMessage("Conectando a Supabase...");
+                // Prueba 1: Verificar que supabase se cargó
+                resultDiv.innerHTML += "<br>✅ Supabase cargado";
                 
-                // Prueba simple
-                const { data, error } = await supabase
-                    .from('events')
-                    .select('count')
-                    .limit(1);
+                // Prueba 2: Intentar consulta simple
+                const { data, error } = await supabase.from('events').select('*').limit(1);
                 
-                if (error) throw error;
-                
-                showMessage(`✅ Conexión exitosa a Supabase`);
-                
-            } catch (error) {
-                showMessage(`❌ Error: ${error.message}`, true);
-                console.error("Error detallado:", error);
-            }
-        }
-        
-        async function listTables() {
-            try {
-                showMessage("Buscando tablas disponibles...");
-                
-                // Usamos una consulta a una tabla conocida para ver qué tablas existen
-                const { data: events, error: eventsError } = await supabase
-                    .from('events')
-                    .select('*')
-                    .limit(1);
-                
-                const { data: profiles, error: profilesError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .limit(1);
-                
-                const { data: tournaments, error: tournamentsError } = await supabase
-                    .from('tournaments')
-                    .select('*')
-                    .limit(1);
-                
-                let output = '<h3>Tablas encontradas:</h3><ul>';
-                
-                if (!eventsError) output += '<li>✅ <strong>events</strong> - Existe</li>';
-                else output += `<li>❌ <strong>events</strong> - Error: ${eventsError.message}</li>`;
-                
-                if (!profilesError) output += '<li>✅ <strong>profiles</strong> - Existe</li>';
-                else output += `<li>❌ <strong>profiles</strong> - Error: ${profilesError.message}</li>`;
-                
-                if (!tournamentsError) output += '<li>✅ <strong>tournaments</strong> - Existe</li>';
-                else output += `<li>❌ <strong>tournaments</strong> - Error: ${tournamentsError.message}</li>`;
-                
-                output += '</ul>';
-                
-                document.getElementById('output').innerHTML = output;
-                showMessage("✅ Consulta de tablas completada");
-                
-            } catch (error) {
-                showMessage(`❌ Error: ${error.message}`, true);
+                if (error) {
+                    resultDiv.innerHTML += `<br>❌ Error: ${error.message}`;
+                    resultDiv.innerHTML += `<br>⚠️ Código: ${error.code}`;
+                    resultDiv.innerHTML += `<br>⚠️ Detalles: ${JSON.stringify(error)}`;
+                } else {
+                    resultDiv.innerHTML += `<br>✅ Conexión OK. Datos: ${data.length} registros`;
+                }
+            } catch (err) {
+                resultDiv.innerHTML += `<br>❌ Excepción: ${err.message}`;
             }
         }
         
         async function getEvents() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "Obteniendo eventos...";
+            
             try {
-                showMessage("Cargando eventos...");
-                
                 const { data, error } = await supabase
                     .from('events')
                     .select('*')
-                    .order('start_date', { ascending: true });
+                    .order('start_date');
                 
-                if (error) throw error;
-                
-                let output = `<h3>Eventos encontrados: ${data.length}</h3>`;
-                
-                if (data.length > 0) {
-                    output += `<table>
-                        <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>Inicio</th>
-                            <th>Fin</th>
-                            <th>Color</th>
-                        </tr>`;
-                    
-                    data.forEach(event => {
-                        output += `<tr>
-                            <td>${event.id}</td>
-                            <td>${event.title || 'Sin título'}</td>
-                            <td>${event.start_date || 'Sin fecha'}</td>
-                            <td>${event.end_date || 'Sin fecha'}</td>
-                            <td style="background:${event.color || '#5865f2'}">${event.color || '#5865f2'}</td>
-                        </tr>`;
-                    });
-                    
-                    output += '</table>';
-                    
-                    // Mostrar datos crudos para debug
-                    output += `<h4>Datos JSON:</h4><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                if (error) {
+                    resultDiv.innerHTML = `❌ ERROR: ${error.message}`;
+                    console.error("Error completo:", error);
                 } else {
-                    output += '<p>No hay eventos en la tabla.</p>';
+                    resultDiv.innerHTML = `✅ ${data.length} eventos encontrados:`;
+                    data.forEach(event => {
+                        resultDiv.innerHTML += `<br>- ${event.id}: ${event.title} (${event.start_date} a ${event.end_date})`;
+                    });
                 }
-                
-                document.getElementById('output').innerHTML = output;
-                showMessage(`✅ Encontrados ${data.length} eventos`);
-                
-            } catch (error) {
-                showMessage(`❌ Error: ${error.message}`, true);
-                document.getElementById('output').innerHTML = 
-                    `<div class="error"><strong>Error:</strong> ${error.message}<br>
-                    <pre>${JSON.stringify(error, null, 2)}</pre></div>`;
+            } catch (err) {
+                resultDiv.innerHTML = `❌ EXCEPCIÓN: ${err.message}`;
             }
         }
-        
-        // Iniciar prueba automática al cargar
-        document.addEventListener('DOMContentLoaded', async () => {
-            showMessage("Página cargada. Haz clic en 'Probar Conexión' para empezar.");
-        });
     </script>
 </body>
 </html>
