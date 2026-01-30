@@ -127,7 +127,7 @@
     // ==============================
     console.log("🚀 Iniciando profile.html con config centralizada");
     
-    // Obtener Supabase desde config.js
+    // Obtener Supabase desde config.js (solo esta línea)
     const supabase = getSupabaseClient();
     
     // ==============================
@@ -160,11 +160,11 @@
       debugArea.innerHTML += `Conectando a Supabase...<br>`;
       
       try {
-        // Cargar Supabase
-        const { createClient } = window.supabase;
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        // **CORRECCIÓN: ELIMINAR ESTAS 2 LÍNEAS** (ya tienes supabase arriba)
+        // const { createClient } = window.supabase;
+        // const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        debugArea.innerHTML += `✅ Supabase cargado<br>`;
+        debugArea.innerHTML += `✅ Supabase cargado desde config.js<br>`;
         
         // PRIMERO: Verificar todos los usuarios
         debugArea.innerHTML += `🔍 Buscando TODOS los usuarios...<br>`;
@@ -312,11 +312,12 @@
         
         debugArea.innerHTML += `✅ Supabase CDN cargado<br>`;
         
-        // Test 2: Crear cliente
-        const { createClient } = window.supabase;
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        // **CORRECCIÓN: Usar el cliente que ya tenemos**
+        if (!supabase) {
+          throw new Error("No se pudo crear cliente Supabase desde config.js");
+        }
         
-        debugArea.innerHTML += `✅ Cliente Supabase creado<br>`;
+        debugArea.innerHTML += `✅ Cliente Supabase creado desde config.js<br>`;
         
         // Test 3: Consulta simple
         const { data, error } = await supabase
