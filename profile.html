@@ -119,12 +119,12 @@
 
   <script>
     // ==============================
-    // 1. CONFIGURACIÓN SIMPLE
+    // 1. CONFIGURACIÓN DESDE config.js
     // ==============================
-    const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
+    console.log("🚀 Iniciando profile.html con config centralizada");
     
-    console.log("🚀 Iniciando profile.html SIMPLE");
+    // Obtener Supabase desde config.js
+    const supabase = getSupabaseClient();
     
     // ==============================
     // 2. FUNCIÓN PRINCIPAL
