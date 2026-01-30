@@ -341,3 +341,172 @@
 .event-bar.overlap-2 {
     top: 75%;
 }
+
+/* Barras de eventos mejoradas */
+.event-bar {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 36px;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
+    border-radius: 8px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    z-index: 2;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.event-bar.overlap-2 {
+    height: 30px;
+    top: 60%;
+}
+
+.event-bar:hover {
+    transform: translateY(-50%) scale(1.05);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.event-bar-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-bar i {
+    font-size: 0.9rem;
+    filter: brightness(1.2);
+}
+
+/* Celdas del calendario */
+.day-cell {
+    position: relative;
+    border-right: 1px solid #eaeaea;
+    min-height: 60px;
+    background: #fff;
+}
+
+.day-cell:last-child {
+    border-right: none;
+}
+
+/* Filas de eventos */
+.event-row {
+    display: flex;
+    min-height: 60px;
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.event-row:last-child {
+    border-bottom: none;
+}
+
+/* Etiqueta del evento (columna izquierda) */
+.event-label {
+    width: 200px;
+    padding: 10px 15px;
+    border-right: 1px solid #eaeaea;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fafafa;
+    flex-shrink: 0;
+}
+
+.event-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.event-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.2;
+}
+
+.event-dates {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+.event-time {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 1px;
+}
+
+/* Leyenda mejorada */
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #eaeaea;
+}
+
+.legend-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.legend-text {
+    font-size: 0.85rem;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .event-label {
+        width: 150px;
+        padding: 8px 10px;
+    }
+    
+    .event-bar {
+        height: 30px;
+        font-size: 0.75rem;
+        padding: 0 8px;
+    }
+    
+    .event-bar.overlap-2 {
+        height: 26px;
+    }
+}
