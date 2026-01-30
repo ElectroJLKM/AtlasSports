@@ -8,6 +8,8 @@
   
   <!-- Cargar Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  <!-- CONFIGURACIÓN CENTRALIZADA -->
+  <script src="js/config.js"></script>
   
   <style>
     .auth-container {
@@ -110,7 +112,7 @@
   </main>
 
   <script>
-    // Configurar Supabase
+    // Obtener cliente Supabase desde config.js
     const supabase = getSupabaseClient();
     
     // Manejar el formulario de login
