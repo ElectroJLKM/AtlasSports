@@ -1,14 +1,15 @@
-// Configuración de Supabase
-const SUPABASE_URL = "https://uqffsnrhasfqfcswkncf.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZmZzbnJoYXNmcWZjc3drbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NzgyMDcsImV4cCI6MjA4NTE1NDIwN30.qVcKz8PuuEOBsObidm7Phmx-pw8iitYkH3Hzyc_E9Ak";
+// torneos.js - Usa config.js
 
-// Inicializar Supabase
-let supabase;
-if (window.supabaseClient) {
-    supabase = window.supabaseClient;  // Usa el que ya existe
-} else {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabaseClient = supabase;  // Guarda para reusar
+// Obtener Supabase desde config.js
+const supabase = getSupabaseClient();
+
+if (!supabase) {
+    console.error('❌ Error: Supabase no inicializado. Asegúrate de cargar config.js primero');
+    document.getElementById('calendar-body').innerHTML = `
+        <div class="no-events">
+            <p>Error de configuración. Recarga la página.</p>
+        </div>
+    `;
 }
 
 // Variables globales
@@ -20,7 +21,7 @@ let eventRows = {};
 function getMonday(date) {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Ajustar cuando es domingo
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
 }
 
@@ -110,28 +111,23 @@ function renderCalendarHeader() {
 function renderCalendarBody() {
     const body = document.getElementById('calendar-body');
     
-    // Limpiar filas existentes
     eventRows = {};
     
-    // Crear filas para cada evento
     events.forEach(event => {
         const eventId = event.id;
         const startDate = new Date(event.start_date);
         const endDate = new Date(event.end_date);
         
-        // Verificar si el evento cae en la semana actual
         const weekEnd = new Date(currentWeekStart);
         weekEnd.setDate(weekEnd.getDate() + 6);
         
         if (endDate >= currentWeekStart && startDate <= weekEnd) {
-            // Calcular posición y duración
             const eventStart = startDate < currentWeekStart ? currentWeekStart : startDate;
             const eventEnd = endDate > weekEnd ? weekEnd : endDate;
             
             const startDay = Math.max(0, Math.floor((eventStart - currentWeekStart) / (1000 * 60 * 60 * 24)));
             const durationDays = Math.floor((eventEnd - eventStart) / (1000 * 60 * 60 * 24)) + 1;
             
-            // Encontrar fila disponible
             let rowIndex = 0;
             while (true) {
                 if (!eventRows[rowIndex]) {
@@ -159,7 +155,6 @@ function renderCalendarBody() {
         }
     });
     
-    // Renderizar filas
     let html = '';
     const rowCount = Object.keys(eventRows).length;
     
@@ -187,7 +182,6 @@ function renderCalendarBody() {
                     </div>
             `;
             
-            // Crear celdas de días
             for (let day = 0; day < 7; day++) {
                 html += `<div class="day-cell" id="cell-${i}-${day}"></div>`;
             }
@@ -198,10 +192,7 @@ function renderCalendarBody() {
     
     body.innerHTML = html;
     
-    // Renderizar barras de eventos
     renderEventBars();
-    
-    // Renderizar leyenda
     renderLegend();
 }
 
@@ -217,12 +208,10 @@ function renderEventBars() {
             const color = eventData.color;
             const title = eventData.title;
             
-            // Calcular posición y tamaño
-            const cellWidth = 100 / 7; // Porcentaje del ancho de cada celda
+            const cellWidth = 100 / 7;
             const left = startDay * cellWidth;
             const width = durationDays * cellWidth;
             
-            // Determinar si hay superposición vertical
             const overlapClass = rowIndex % 2 === 0 ? '' : 'overlap-2';
             
             const barHtml = `
@@ -236,15 +225,12 @@ function renderEventBars() {
                 </div>
             `;
             
-            // Insertar barra en la primera celda que ocupa
             const firstCell = document.getElementById(`cell-${rowIndex}-${startDay}`);
             if (firstCell) {
                 firstCell.innerHTML = barHtml;
                 
-                // Añadir evento hover
                 const bar = firstCell.querySelector('.event-bar');
                 bar.addEventListener('mouseenter', function() {
-                    // Resaltar todas las barras del mismo evento
                     document.querySelectorAll('.event-bar').forEach(b => {
                         if (b.style.backgroundColor === color && b.title === this.title) {
                             b.style.transform = b.classList.contains('overlap-2') 
@@ -302,17 +288,13 @@ function changeWeek(direction) {
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', function() {
-    // Establecer semana actual
     currentWeekStart = getMonday(new Date());
     
-    // Cargar eventos
     loadEvents();
     
-    // Configurar botones de navegación
     document.getElementById('prev-week').addEventListener('click', () => changeWeek(-1));
     document.getElementById('next-week').addEventListener('click', () => changeWeek(1));
     
-    // Botón para volver a hoy
     const todayBtn = document.createElement('button');
     todayBtn.className = 'calendar-btn';
     todayBtn.innerHTML = '<i class="fas fa-calendar-day"></i> Hoy';
