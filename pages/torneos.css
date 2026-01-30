@@ -1,0 +1,343 @@
+/* ===== ESTILOS ESPECÍFICOS PARA TORNEOS ===== */
+
+.hero-torneos {
+    padding: 3rem 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, var(--accent-blue), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.calendario-section {
+    padding: 3rem 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.container {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.section-subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+/* Controles del calendario */
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background-color: rgba(15, 23, 42, 0.7);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.current-week {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background-color: rgba(88, 101, 242, 0.2);
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--border-radius);
+}
+
+.calendar-btn {
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.calendar-btn:hover {
+    background-color: var(--accent-blue-hover);
+    transform: translateY(-2px);
+}
+
+.calendar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Contenedor del calendario */
+.calendar-container {
+    background-color: rgba(15, 23, 42, 0.7);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Encabezado de días */
+.calendar-header {
+    display: grid;
+    grid-template-columns: 200px repeat(7, 1fr);
+    background-color: rgba(30, 41, 59, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-header {
+    padding: 1.2rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-header.empty {
+    background-color: rgba(15, 23, 42, 0.9);
+}
+
+.day-header .date {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.day-header .day {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.day-header.today {
+    background-color: rgba(88, 101, 242, 0.2);
+    position: relative;
+}
+
+.day-header.today::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--accent-blue);
+}
+
+/* Cuerpo del calendario */
+.calendar-body {
+    min-height: 500px;
+    position: relative;
+}
+
+.event-row {
+    display: grid;
+    grid-template-columns: 200px repeat(7, 1fr);
+    min-height: 70px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.event-row:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.event-label {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(15, 23, 42, 0.7);
+}
+
+.event-icon {
+    width: 2rem;
+    height: 2rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.event-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.event-dates {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+/* Celdas de días */
+.day-cell {
+    position: relative;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.day-cell:last-child {
+    border-right: none;
+}
+
+/* Barras de eventos */
+.event-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    overflow: hidden;
+    z-index: 2;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+}
+
+.event-bar:hover {
+    transform: translateY(-50%) scale(1.02);
+    z-index: 10;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.event-bar-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Leyenda */
+.legend {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend h3 {
+    margin-bottom: 1.2rem;
+    color: var(--text-primary);
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.legend-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Loading y estado vacío */
+.loading, .no-events {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.loading-spinner {
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--accent-blue);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .calendar-header, .event-row {
+        grid-template-columns: 150px repeat(7, 1fr);
+    }
+    
+    .event-label {
+        padding: 0.8rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .calendar-container {
+        overflow-x: auto;
+    }
+    
+    .calendar-header, .event-row {
+        min-width: 1000px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendario-section, .hero-torneos {
+        padding: 2rem 1rem;
+    }
+    
+    .container {
+        padding: 1.5rem;
+    }
+    
+    .calendar-controls {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .calendar-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .legend-items {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Estilos para eventos superpuestos */
+.event-bar.overlap-1 {
+    top: 25%;
+}
+
+.event-bar.overlap-2 {
+    top: 75%;
+}
