@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario de Torneos - AtlasSports</title>
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="torneos.css">
+    <title>Calendario de Torneos - Atlas Sports</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/torneos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
         <div class="brand">
-            <img src="https://via.placeholder.com/40x40/5865f2/ffffff?text=AS" alt="Logo AtlasSports" class="logo">
-            <span>AtlasSports</span>
+            <img src="../assets/logo.png" alt="Logo Atlas Sports" class="logo">
+            <a href="../index.html" style="color: inherit; text-decoration: none;">
+                <span>Atlas Sports</span>
+            </a>
         </div>
         <div class="menu">
-            <a href="index.html">Inicio</a>
+            <a href="../index.html">Inicio</a>
             <a href="torneos.html" class="active">Torneos</a>
-            <a href="#comunidad">Comunidad</a>
-            <a href="#ranking">Ranking</a>
-            <a href="#premios">Premios</a>
+            <a href="comunidad.html">Comunidad</a>
+            <a href="ranked.html">Ranking</a>
+            <a href="noticias.html">Noticias</a>
         </div>
         <div class="auth">
-            <a href="#login" class="login-btn">Iniciar Sesión</a>
-            <a href="#register" class="btn">Registrarse</a>
+            <a href="../login.html" class="login-btn">Iniciar Sesión</a>
+            <a href="../register.html" class="btn">Registrarse</a>
         </div>
     </nav>
 
@@ -94,17 +95,17 @@
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Footer con rutas corregidas -->
     <footer class="footer">
-        <p>© 2024 AtlasSports. Todos los derechos reservados.</p>
-        <p><a href="#politica">Política de Privacidad</a> | <a href="#terminos">Términos de Servicio</a> | <a href="#contacto">Contacto</a></p>
-        <p class="footer-note">
-            <i class="fab fa-discord"></i> Únete a nuestro servidor de Discord para más información
+        <p>© 2024 Atlas Sports - Comunidad de Duck Game</p>
+        <p>
+            <a href="../terminos.html">Términos</a> |
+            <a href="../privacidad.html">Privacidad</a> |
+            <a href="https://discord.gg/7ueUkNj5wX" target="_blank" rel="noopener">Discord</a>
         </p>
     </footer>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="torneos.js"></script>
+    <script src="../js/torneos.js"></script>
 </body>
 </html>
