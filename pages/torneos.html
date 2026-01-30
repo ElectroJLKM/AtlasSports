@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Torneos - AtlasSports</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="torneos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="brand">
+            <img src="https://via.placeholder.com/40x40/5865f2/ffffff?text=AS" alt="Logo AtlasSports" class="logo">
+            <span>AtlasSports</span>
+        </div>
+        <div class="menu">
+            <a href="index.html">Inicio</a>
+            <a href="torneos.html" class="active">Torneos</a>
+            <a href="#comunidad">Comunidad</a>
+            <a href="#ranking">Ranking</a>
+            <a href="#premios">Premios</a>
+        </div>
+        <div class="auth">
+            <a href="#login" class="login-btn">Iniciar Sesión</a>
+            <a href="#register" class="btn">Registrarse</a>
+        </div>
+    </nav>
 
+    <!-- Hero Section Torneos -->
+    <section class="hero-torneos">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Calendario de <span class="gradient-text">Torneos</span></h1>
+                <p class="subtitle">
+                    Participa en competencias emocionantes y gana premios exclusivos. 
+                    Todos nuestros torneos están diseñados para ofrecer la mejor experiencia competitiva.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#calendario" class="btn discord-btn">
+                        <i class="fas fa-calendar-alt"></i> Ver Calendario
+                    </a>
+                    <a href="#inscripciones" class="btn secondary-btn">
+                        <i class="fas fa-user-plus"></i> Inscribirse
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Competidores de Esports">
+            </div>
+        </div>
+    </section>
+
+    <!-- Calendario Section -->
+    <section id="calendario" class="calendario-section">
+        <div class="container">
+            <h2><i class="fas fa-calendar-week"></i> Calendario de Eventos</h2>
+            <p class="section-subtitle">Visualiza todos los torneos programados y su duración en el calendario interactivo.</p>
+            
+            <!-- Controles del Calendario -->
+            <div class="calendar-controls">
+                <button id="prev-week" class="calendar-btn"><i class="fas fa-chevron-left"></i> Semana Anterior</button>
+                <div class="current-week">
+                    <span id="week-range">Cargando...</span>
+                </div>
+                <button id="next-week" class="calendar-btn">Semana Siguiente <i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <!-- Calendario Grid -->
+            <div class="calendar-container">
+                <!-- Encabezado de días -->
+                <div class="calendar-header" id="calendar-header">
+                    <div class="day-header empty"></div>
+                    <!-- Los días se generarán con JavaScript -->
+                </div>
+                
+                <!-- Cuerpo del calendario -->
+                <div class="calendar-body" id="calendar-body">
+                    <div class="loading" id="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Cargando eventos...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leyenda -->
+            <div class="legend" id="legend">
+                <h3><i class="fas fa-key"></i> Leyenda de Eventos</h3>
+                <div class="legend-items" id="legend-items">
+                    <!-- Se generará con JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2024 AtlasSports. Todos los derechos reservados.</p>
+        <p><a href="#politica">Política de Privacidad</a> | <a href="#terminos">Términos de Servicio</a> | <a href="#contacto">Contacto</a></p>
+        <p class="footer-note">
+            <i class="fab fa-discord"></i> Únete a nuestro servidor de Discord para más información
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="torneos.js"></script>
+</body>
+</html>
