@@ -80,11 +80,11 @@
     transform: none;
 }
 
-/* === CONTENEDOR DEL CALENDARIO CON OVERFLOW VISIBLE === */
+/* Contenedor del calendario */
 .calendar-container {
     background-color: rgba(15, 23, 42, 0.7);
     border-radius: var(--border-radius);
-    overflow: visible !important; /* CRÍTICO: Cambiado de hidden a visible */
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -136,27 +136,25 @@
     background-color: var(--accent-blue);
 }
 
-/* === CUERPO DEL CALENDARIO CON OVERFLOW VISIBLE === */
+/* Cuerpo del calendario */
 .calendar-body {
     min-height: 500px;
     position: relative;
-    overflow: visible !important; /* CRÍTICO: Permitir que las barras se extiendan */
 }
 
-/* === ESTILOS MEJORADOS PARA EVENTOS - USANDO FLEX === */
+/* === NUEVA ESTRUCTURA - FILAS DE EVENTOS === */
 .event-row {
     display: flex;
     min-height: 70px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
-    overflow: visible !important; /* CRÍTICO: Para barras que se extienden */
 }
 
 .event-row:hover {
     background-color: rgba(255, 255, 255, 0.02);
 }
 
-/* Etiqueta del evento (columna izquierda) */
+/* Etiqueta del evento */
 .event-label {
     width: 200px;
     padding: 1rem;
@@ -182,8 +180,7 @@
 
 .event-info {
     flex: 1;
-    min-width: 0; /* Permite que el texto se trunque */
-    overflow: hidden; /* Evita desbordamiento */
+    min-width: 0;
 }
 
 .event-title {
@@ -205,56 +202,55 @@
     margin-top: 0.1rem;
 }
 
-/* === CELDAS DE DÍAS CON OVERFLOW VISIBLE === */
-.day-cell {
-    position: relative;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+/* === CONTENEDOR DE DÍAS (NUEVO) === */
+.calendar-days-container {
+    display: flex;
     flex: 1;
-    min-height: 70px;
-    background-color: rgba(15, 23, 42, 0.3);
-    overflow: visible !important; /* CRÍTICO: Para barras que se extienden */
+    position: relative;
 }
 
-.day-cell:last-child {
+/* Slots de días */
+.day-slot {
+    flex: 1;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    min-height: 70px;
+    overflow: visible !important;
+}
+
+.day-slot:last-child {
     border-right: none;
 }
 
-/* === BARRAS DE EVENTOS MEJORADAS (OCUPAN MÚLTIPLES CELDAS) === */
+/* === BARRAS DE EVENTOS (SIMPLIFICADO) === */
 .event-bar {
     position: absolute;
     top: 50%;
-    left: 0;
-    height: 36px;
     transform: translateY(-50%);
+    height: 36px;
     background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
     border-radius: 8px;
     padding: 0 12px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
     color: white;
     font-size: 0.85rem;
     font-weight: 500;
-    overflow: visible; /* IMPORTANTE */
     transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     z-index: 2;
     cursor: pointer;
     border: 2px solid rgba(255,255,255,0.3);
     box-sizing: border-box;
     white-space: nowrap;
+    overflow: hidden;
 }
 
-.event-bar.overlap-2 {
-    height: 30px;
-    top: 60%;
-    z-index: 1;
-}
-
+/* Barras que ocupan múltiples días se ven más anchas */
 .event-bar:hover {
-    transform: translateY(-50%) scale(1.05);
-    z-index: 10;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    transform: translateY(-50%) scale(1.02);
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .event-bar-content {
@@ -265,12 +261,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-    pointer-events: none; /* Evitar interferencia con el hover */
 }
 
 .event-bar i {
     font-size: 0.9rem;
-    filter: brightness(1.2);
     flex-shrink: 0;
 }
 
@@ -280,39 +274,6 @@
     white-space: nowrap;
     flex: 1;
     min-width: 0;
-}
-
-/* === ESTILOS ESPECÍFICOS PARA BARRAS LARGAS === */
-/* Estas clases ayudan con barras que abarcan múltiples días */
-.event-bar[style*="width: 100%"] {
-    border-radius: 8px;
-    /* Asegurar que ocupe todo el espacio de 7 días */
-    width: calc(700% - 12px) !important;
-}
-
-.event-bar[style*="width: 85.7143%"] { /* 6 días */
-    width: calc(600% - 10px) !important;
-}
-
-.event-bar[style*="width: 71.4286%"] { /* 5 días */
-    width: calc(500% - 8px) !important;
-}
-
-.event-bar[style*="width: 57.1429%"] { /* 4 días */
-    width: calc(400% - 6px) !important;
-}
-
-.event-bar[style*="width: 42.8571%"] { /* 3 días */
-    width: calc(300% - 4px) !important;
-}
-
-.event-bar[style*="width: 28.5714%"] { /* 2 días */
-    width: calc(200% - 2px) !important;
-}
-
-/* Clase para debug (celdas que son parte de un evento) */
-.event-part {
-    background-color: rgba(255, 255, 255, 0.01);
 }
 
 /* Leyenda */
@@ -367,11 +328,6 @@
     padding: 3rem;
     color: var(--text-secondary);
     font-size: 1.1rem;
-    position: absolute;
-    width: 100%;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
 }
 
 .loading-spinner {
@@ -391,53 +347,6 @@
 
 .no-events {
     background: rgba(15, 23, 42, 0.5);
-    border-radius: var(--border-radius);
-    margin: 2rem auto;
-}
-
-.no-events i {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: var(--accent-blue);
-    opacity: 0.7;
-}
-
-.no-events p {
-    margin: 0.5rem 0;
-}
-
-.no-events .small-text {
-    font-size: 0.9rem;
-    opacity: 0.7;
-}
-
-/* === ESTILOS PARA DÍAS DE HOY === */
-.day-header.today .date {
-    color: var(--accent-blue);
-    font-weight: 700;
-}
-
-/* Asegurar que el loading esté posicionado correctamente */
-.loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(15, 23, 42, 0.8);
-    z-index: 100;
-}
-
-/* Mejor visualización para mensajes de error/no eventos */
-.no-events {
-    padding: 3rem;
-    text-align: center;
-    color: var(--text-secondary);
-    background-color: rgba(15, 23, 42, 0.5);
     border-radius: var(--border-radius);
     margin: 2rem auto;
     max-width: 500px;
@@ -517,38 +426,9 @@
         padding: 0 8px;
     }
     
-    .event-bar.overlap-2 {
-        height: 26px;
-    }
-    
     .event-icon {
         width: 1.5rem;
         height: 1.5rem;
         font-size: 1rem;
-    }
-    
-    /* Ajustar ancho de barras en móvil */
-    .event-bar[style*="width: 100%"] {
-        width: calc(700% - 6px) !important;
-    }
-    
-    .event-bar[style*="width: 85.7143%"] {
-        width: calc(600% - 5px) !important;
-    }
-    
-    .event-bar[style*="width: 71.4286%"] {
-        width: calc(500% - 4px) !important;
-    }
-    
-    .event-bar[style*="width: 57.1429%"] {
-        width: calc(400% - 3px) !important;
-    }
-    
-    .event-bar[style*="width: 42.8571%"] {
-        width: calc(300% - 2px) !important;
-    }
-    
-    .event-bar[style*="width: 28.5714%"] {
-        width: calc(200% - 1px) !important;
     }
 }
