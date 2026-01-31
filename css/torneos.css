@@ -538,4 +538,121 @@
         flex: 1;
         min-width: 0;
     }
+
+        /* === CRITICAL: ESTILOS PARA BARRAS QUE OCUPAN MÚLTIPLES CELDAS === */
+    
+    /* Las celdas deben permitir que las barras se extiendan más allá de sus límites */
+    .day-cell {
+        position: relative;
+        flex: 1;
+        min-height: 70px;
+        background-color: rgba(15, 23, 42, 0.3);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: visible !important; /* IMPORTANTE: permitir desbordamiento */
+    }
+    
+    /* Asegurar que todas las celdas tengan overflow visible */
+    .calendar-body .day-cell {
+        overflow: visible;
+    }
+    
+    /* Las barras deben poder salirse de su contenedor */
+    .event-bar {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        height: 36px;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
+        border-radius: 8px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 500;
+        overflow: visible; /* IMPORTANTE */
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        z-index: 2;
+        cursor: pointer;
+        border: 2px solid rgba(255,255,255,0.3);
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+    
+    /* Cuando una barra está en una celda pero debe extenderse a la derecha */
+    .event-row {
+        position: relative;
+        display: flex;
+        min-height: 70px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: visible; /* IMPORTANTE: permitir que las barras se extiendan */
+    }
+    
+    /* El contenedor del calendario también debe permitir overflow */
+    .calendar-body {
+        min-height: 500px;
+        position: relative;
+        overflow: visible !important;
+    }
+    
+    /* Ajustar el contenedor principal del calendario */
+    .calendar-container {
+        overflow: visible !important; /* Cambiar de 'hidden' a 'visible' */
+    }
+    
+    /* Estilos específicos para barras que abarcan múltiples días */
+    .event-bar[style*="width: 100%"] {
+        border-radius: 8px;
+        /* Asegurar que ocupe todo el espacio */
+        width: calc(700% - 6px) !important; /* 7 días * 100% - bordes */
+        box-sizing: border-box;
+    }
+    
+    .event-bar[style*="width: 85.7143%"] { /* 6 días */
+        width: calc(600% - 5px) !important;
+    }
+    
+    .event-bar[style*="width: 71.4286%"] { /* 5 días */
+        width: calc(500% - 4px) !important;
+    }
+    
+    .event-bar[style*="width: 57.1429%"] { /* 4 días */
+        width: calc(400% - 3px) !important;
+    }
+    
+    .event-bar[style*="width: 42.8571%"] { /* 3 días */
+        width: calc(300% - 2px) !important;
+    }
+    
+    .event-bar[style*="width: 28.5714%"] { /* 2 días */
+        width: calc(200% - 1px) !important;
+    }
+    
+    /* Asegurar que el contenido de la barra se vea bien */
+    .event-bar-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        pointer-events: none; /* Evitar interferencia con el hover */
+    }
+    
+    .event-bar-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    /* Clase para celdas que son parte de un evento pero no contienen la barra */
+    .event-part {
+        background-color: rgba(255, 255, 255, 0.01); /* Muy sutil para debug */
+    }
 }
