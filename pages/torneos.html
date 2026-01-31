@@ -61,11 +61,18 @@
             
             <!-- Controles del Calendario -->
             <div class="calendar-controls">
-                <button id="prev-week" class="calendar-btn"><i class="fas fa-chevron-left"></i> Semana Anterior</button>
+                <button id="prev-week" class="calendar-btn">
+                    <i class="fas fa-chevron-left"></i> Semana Anterior
+                </button>
+                <button id="today-btn" class="calendar-btn" style="display: none;">
+                    <i class="fas fa-calendar-day"></i> Hoy
+                </button>
                 <div class="current-week">
                     <span id="week-range">Cargando...</span>
                 </div>
-                <button id="next-week" class="calendar-btn">Semana Siguiente <i class="fas fa-chevron-right"></i></button>
+                <button id="next-week" class="calendar-btn">
+                    Semana Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
             
             <!-- Calendario Grid -->
@@ -82,6 +89,7 @@
                         <div class="loading-spinner"></div>
                         <p>Cargando eventos...</p>
                     </div>
+                    <!-- Los eventos se generarán con JavaScript -->
                 </div>
             </div>
             
@@ -95,7 +103,23 @@
         </div>
     </section>
 
-    <!-- Footer con rutas corregidas -->
+    <!-- Sección de Inscripciones -->
+    <section id="inscripciones" class="inscripciones-section">
+        <div class="container">
+            <h2><i class="fas fa-user-plus"></i> Inscripciones Abiertas</h2>
+            <p class="section-subtitle">Participa en nuestros próximos torneos. Selecciona un evento para inscribirte.</p>
+            
+            <div class="inscripciones-grid" id="inscripciones-grid">
+                <!-- Las tarjetas de inscripción se generarán con JavaScript -->
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando torneos disponibles...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer class="footer">
         <p>© 2024 Atlas Sports - Comunidad de Duck Game</p>
         <p>
@@ -105,6 +129,7 @@
         </p>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
     <script src="../js/torneos.js"></script>
