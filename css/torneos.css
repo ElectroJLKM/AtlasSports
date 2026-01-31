@@ -142,24 +142,30 @@
     position: relative;
 }
 
+/* === ESTILOS MEJORADOS PARA EVENTOS (VERSIÓN CORREGIDA) === */
+
+/* Filas de eventos - USAR FLEX en lugar de GRID para compatibilidad */
 .event-row {
-    display: grid;
-    grid-template-columns: 200px repeat(7, 1fr);
+    display: flex;
     min-height: 70px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
 }
 
 .event-row:hover {
     background-color: rgba(255, 255, 255, 0.02);
 }
 
+/* Etiqueta del evento (columna izquierda) */
 .event-label {
+    width: 200px;
     padding: 1rem;
     display: flex;
     align-items: center;
     gap: 1rem;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     background-color: rgba(15, 23, 42, 0.7);
+    flex-shrink: 0;
 }
 
 .event-icon {
@@ -171,11 +177,13 @@
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
+    flex-shrink: 0;
 }
 
 .event-title {
     font-weight: 600;
     color: var(--text-primary);
+    line-height: 1.2;
 }
 
 .event-dates {
@@ -184,48 +192,75 @@
     margin-top: 0.2rem;
 }
 
+.event-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    margin-top: 0.1rem;
+}
+
 /* Celdas de días */
 .day-cell {
     position: relative;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    flex: 1;
+    min-height: 70px;
+    background-color: rgba(15, 23, 42, 0.3);
 }
 
 .day-cell:last-child {
     border-right: none;
 }
 
-/* Barras de eventos */
+/* === BARRAS DE EVENTOS MEJORADAS === */
 .event-bar {
     position: absolute;
     top: 50%;
+    left: 0;
+    height: 36px;
     transform: translateY(-50%);
-    height: 40px;
+    background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
     border-radius: 8px;
+    padding: 0 12px;
     display: flex;
     align-items: center;
-    padding: 0 1rem;
+    justify-content: flex-start;
     color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
     overflow: hidden;
-    z-index: 2;
+    transition: all 0.3s ease;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    transition: var(--transition);
+    z-index: 2;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.event-bar.overlap-2 {
+    height: 30px;
+    top: 60%;
+    z-index: 1;
 }
 
 .event-bar:hover {
-    transform: translateY(-50%) scale(1.02);
+    transform: translateY(-50%) scale(1.05);
     z-index: 10;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 .event-bar-content {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.event-bar i {
+    font-size: 0.9rem;
+    filter: brightness(1.2);
+    flex-shrink: 0;
 }
 
 /* Leyenda */
@@ -250,17 +285,28 @@
     display: flex;
     align-items: center;
     gap: 0.7rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    flex-shrink: 0;
 }
 
 .legend-text {
     color: var(--text-secondary);
     font-size: 0.95rem;
+    font-weight: 500;
 }
 
 /* Loading y estado vacío */
@@ -269,6 +315,11 @@
     padding: 3rem;
     color: var(--text-secondary);
     font-size: 1.1rem;
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
 }
 
 .loading-spinner {
@@ -286,14 +337,28 @@
     100% { transform: rotate(360deg); }
 }
 
+.no-events {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: var(--border-radius);
+    margin: 2rem 0;
+}
+
+.no-events i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--accent-blue);
+    opacity: 0.7;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
-    .calendar-header, .event-row {
-        grid-template-columns: 150px repeat(7, 1fr);
+    .event-label {
+        width: 150px;
+        padding: 0.8rem;
     }
     
-    .event-label {
-        padding: 0.8rem;
+    .calendar-header {
+        grid-template-columns: 150px repeat(7, 1fr);
     }
 }
 
@@ -331,173 +396,10 @@
         flex-direction: column;
         gap: 1rem;
     }
-}
-
-/* Estilos para eventos superpuestos */
-.event-bar.overlap-1 {
-    top: 25%;
-}
-
-.event-bar.overlap-2 {
-    top: 75%;
-}
-
-/* Barras de eventos mejoradas */
-.event-bar {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    height: 36px;
-    transform: translateY(-50%);
-    background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
-    border-radius: 8px;
-    padding: 0 12px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    color: white;
-    font-size: 0.85rem;
-    font-weight: 500;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    z-index: 2;
-    cursor: pointer;
-    border: 2px solid rgba(255,255,255,0.3);
-}
-
-.event-bar.overlap-2 {
-    height: 30px;
-    top: 60%;
-}
-
-.event-bar:hover {
-    transform: translateY(-50%) scale(1.05);
-    z-index: 10;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.event-bar-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.event-bar i {
-    font-size: 0.9rem;
-    filter: brightness(1.2);
-}
-
-/* Celdas del calendario */
-.day-cell {
-    position: relative;
-    border-right: 1px solid #eaeaea;
-    min-height: 60px;
-    background: #fff;
-}
-
-.day-cell:last-child {
-    border-right: none;
-}
-
-/* Filas de eventos */
-.event-row {
-    display: flex;
-    min-height: 60px;
-    position: relative;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.event-row:last-child {
-    border-bottom: none;
-}
-
-/* Etiqueta del evento (columna izquierda) */
-.event-label {
-    width: 200px;
-    padding: 10px 15px;
-    border-right: 1px solid #eaeaea;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #fafafa;
-    flex-shrink: 0;
-}
-
-.event-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-}
-
-.event-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #333;
-    line-height: 1.2;
-}
-
-.event-dates {
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: 2px;
-}
-
-.event-time {
-    font-size: 0.75rem;
-    color: #888;
-    margin-top: 1px;
-}
-
-/* Leyenda mejorada */
-.legend-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 10px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #eaeaea;
-}
-
-.legend-color {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-}
-
-.legend-text {
-    font-size: 0.85rem;
-    color: #333;
-    font-weight: 500;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+    
     .event-label {
-        width: 150px;
-        padding: 8px 10px;
+        width: 130px;
+        padding: 0.6rem;
     }
     
     .event-bar {
@@ -508,5 +410,11 @@
     
     .event-bar.overlap-2 {
         height: 26px;
+    }
+    
+    .event-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 1rem;
     }
 }
