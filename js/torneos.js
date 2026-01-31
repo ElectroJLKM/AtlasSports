@@ -150,34 +150,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // === CALCULAR DURACIÓN EN DÍAS ===
-    function calcularDiasDuracion(event) {
-        if (!event.start_date || !event.end_date) return 1;
-        
-        try {
-            // Parsear fechas correctamente (manejar formato YYYY-MM-DD)
-            const startStr = event.start_date.length === 10 ? event.start_date + 'T00:00:00' : event.start_date;
-            const endStr = event.end_date.length === 10 ? event.end_date + 'T23:59:59' : event.end_date;
-            
-            const startDate = new Date(startStr);
-            const endDate = new Date(endStr);
-            
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                console.warn('Fechas inválidas:', event.start_date, event.end_date);
-                return 1;
-            }
-            
-            // Calcular diferencia en días (inclusive)
-            const diffTime = endDate.getTime() - startDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            
-            return Math.max(1, diffDays);
-        } catch (error) {
-            console.error('Error calculando duración:', error, event);
-            return 1;
-        }
-    }
-
     // === RENDERIZAR CALENDARIO ===
     function renderCalendarHeader() {
         const header = document.getElementById('calendar-header');
@@ -247,23 +219,39 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return; // Evento fuera de esta semana
             }
             
-            // Calcular días de inicio y duración VISIBLES en esta semana
-            const visibleStartDate = startDate < weekStart ? weekStart : startDate;
-            const visibleEndDate = endDate > weekEnd ? weekEnd : endDate;
+            // Calcular días de inicio y fin VISIBLES en esta semana
+            const visibleStartDate = new Date(Math.max(startDate.getTime(), weekStart.getTime()));
+            const visibleEndDate = new Date(Math.min(endDate.getTime(), weekEnd.getTime()));
+            
+            // Asegurarse de que las fechas estén dentro del día
+            visibleStartDate.setHours(0, 0, 0, 0);
+            visibleEndDate.setHours(23, 59, 59, 999);
             
             // Calcular posición horizontal (días desde el lunes)
             const startDay = Math.max(0, Math.floor((visibleStartDate - weekStart) / (1000 * 60 * 60 * 24)));
-            const durationDays = Math.floor((visibleEndDate - visibleStartDate) / (1000 * 60 * 60 * 24)) + 1;
+            const durationDays = Math.ceil((visibleEndDate - visibleStartDate) / (1000 * 60 * 60 * 24)) + 1;
             
-            // Debug
-            console.log(`Evento "${event.title}":`, {
-                startDay,
-                durationDays,
-                startDate: startDate.toLocaleDateString(),
-                endDate: endDate.toLocaleDateString(),
-                weekStart: weekStart.toLocaleDateString(),
-                weekEnd: weekEnd.toLocaleDateString()
+            // Asegurar que no exceda los 7 días
+            const finalDurationDays = Math.min(durationDays, 7 - startDay);
+            
+            // Debug detallado
+            console.log(`📅 Evento "${event.title}":`, {
+                fechaInicioEvento: startDate.toLocaleDateString(),
+                fechaFinEvento: endDate.toLocaleDateString(),
+                semanaInicio: weekStart.toLocaleDateString(),
+                semanaFin: weekEnd.toLocaleDateString(),
+                inicioVisible: visibleStartDate.toLocaleDateString(),
+                finVisible: visibleEndDate.toLocaleDateString(),
+                startDay: startDay,
+                durationDays: durationDays,
+                finalDurationDays: finalDurationDays,
+                duracionTotalEvento: Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1 + ' días'
             });
+            
+            if (finalDurationDays <= 0) {
+                console.warn(`Evento "${event.title}" no visible esta semana`);
+                return;
+            }
             
             // Buscar fila sin conflictos
             let rowIndex = 0;
@@ -274,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 
                 // Verificar si hay conflicto en esta fila
                 const conflict = eventRows[rowIndex].some(e => 
-                    e.startDay <= startDay + durationDays - 1 && 
+                    e.startDay <= startDay + finalDurationDays - 1 && 
                     e.startDay + e.durationDays - 1 >= startDay
                 );
                 
@@ -282,7 +270,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     eventRows[rowIndex].push({
                         eventId,
                         startDay,
-                        durationDays,
+                        durationDays: finalDurationDays,
                         color: event.color || '#5865f2',
                         title: event.title,
                         icon: event.icon || 'fa-gamepad',
@@ -371,6 +359,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const durationDays = eventData.durationDays;
                 const color = eventData.color;
                 
+                if (durationDays <= 0) return; // Saltar si no tiene duración
+                
                 // Crear tooltip con información completa
                 const startDate = new Date(event.start_date);
                 const endDate = new Date(event.end_date);
@@ -393,7 +383,7 @@ ${event.description ? '📝 ' + event.description : ''}
                 const overlapClass = parseInt(rowIndex) % 2 === 0 ? '' : 'overlap-2';
                 
                 // Determinar si mostrar el título en la barra
-                const showTitle = durationDays <= 2 || width > 30;
+                const showTitle = durationDays >= 2; // Mostrar título si dura 2+ días
                 
                 const barHtml = `
                     <div class="event-bar ${overlapClass}" 
