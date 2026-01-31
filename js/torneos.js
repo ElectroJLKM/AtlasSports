@@ -7,85 +7,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const weekRangeElement = document.getElementById('week-range');
     const prevWeekBtn = document.getElementById('prev-week');
     const nextWeekBtn = document.getElementById('next-week');
+    const todayBtn = document.getElementById('today-btn');
     const legendItemsElement = document.getElementById('legend-items');
     const loadingElement = document.getElementById('loading');
+    const inscripcionesGrid = document.getElementById('inscripciones-grid');
     
     // Estado del calendario
     let currentDate = new Date();
     let events = [];
-    
-    // Tipos de eventos con colores
-    const eventTypes = [
-        { id: 1, name: 'Torneo Abierto', color: '#5865f2' },
-        { id: 2, name: 'Liga Regular', color: '#10b981' },
-        { id: 3, name: 'Evento Especial', color: '#f59e0b' },
-        { id: 4, name: 'Torneo Eliminatorio', color: '#ef4444' },
-        { id: 5, name: 'Clasificatorio', color: '#8b5cf6' }
-    ];
-    
-    // Datos de ejemplo (reemplazar con datos de Supabase)
-    const sampleEvents = [
-        {
-            id: 1,
-            name: 'Torneo Duck Game Semanal',
-            game: 'Duck Game',
-            type: 1,
-            startDate: getDateString(0),
-            endDate: getDateString(0),
-            description: 'Torneo semanal abierto a todos los jugadores. Modalidad eliminación directa.',
-            time: '20:00',
-            prize: 'Premium Discord + $50',
-            participants: 'Abierto'
-        },
-        {
-            id: 2,
-            name: 'Liga Duck Game Primavera',
-            game: 'Duck Game',
-            type: 2,
-            startDate: getDateString(-2),
-            endDate: getDateString(3),
-            description: 'Liga de temporada con equipos y partidos programados.',
-            time: 'Todo el día',
-            prize: '$500 + Trofeo',
-            participants: '16 equipos'
-        },
-        {
-            id: 3,
-            name: 'Torneo 1v1 Eliminatorio',
-            game: 'Duck Game',
-            type: 4,
-            startDate: getDateString(1),
-            endDate: getDateString(1),
-            description: 'Competencia 1 contra 1, mejor de 3 rondas.',
-            time: '18:00',
-            prize: '$100',
-            participants: '32 jugadores'
-        },
-        {
-            id: 4,
-            name: 'Clasificatorio Regional',
-            game: 'Duck Game',
-            type: 5,
-            startDate: getDateString(4),
-            endDate: getDateString(5),
-            description: 'Clasificatorio para el campeonato regional.',
-            time: '16:00',
-            prize: 'Pase al Regional',
-            participants: 'Abierto'
-        },
-        {
-            id: 5,
-            name: 'Evento Especial: Modo Caos',
-            game: 'Duck Game',
-            type: 3,
-            startDate: getDateString(6),
-            endDate: getDateString(8),
-            description: 'Evento especial con modos de juego personalizados y reglas únicas.',
-            time: '21:00',
-            prize: 'Ítems exclusivos',
-            participants: 'Ilimitado'
-        }
-    ];
     
     // Inicialización
     initCalendar();
@@ -93,31 +22,89 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event Listeners
     prevWeekBtn.addEventListener('click', () => changeWeek(-1));
     nextWeekBtn.addEventListener('click', () => changeWeek(1));
-    
-    // Función para obtener fecha en formato YYYY-MM-DD
-    function getDateString(daysOffset) {
-        const date = new Date();
-        date.setDate(date.getDate() + daysOffset);
-        return date.toISOString().split('T')[0];
-    }
+    todayBtn.addEventListener('click', goToToday);
     
     // Función de inicialización
-    function initCalendar() {
-        loadEvents();
+    async function initCalendar() {
+        // Mostrar botón "Hoy"
+        todayBtn.style.display = 'flex';
+        
+        // Inicializar Supabase
+        const supabase = window.getSupabaseClient();
+        if (!supabase) {
+            console.error('Supabase no está inicializado');
+            showError('Error de conexión con la base de datos');
+            return;
+        }
+        
+        // Cargar eventos reales desde Supabase
+        await loadEventsFromSupabase(supabase);
         renderCalendar();
         renderLegend();
     }
     
-    // Función para cargar eventos (ejemplo, integrar con Supabase después)
-    function loadEvents() {
-        // Simular carga de datos
-        loadingElement.style.display = 'flex';
-        
-        setTimeout(() => {
-            events = sampleEvents;
+    // Función para cargar eventos desde Supabase
+    async function loadEventsFromSupabase(supabase) {
+        try {
+            loadingElement.style.display = 'flex';
+            
+            const { data, error } = await supabase
+                .from('events')
+                .select('*')
+                .order('start_date', { ascending: true });
+            
+            if (error) throw error;
+            
+            // Transformar datos de Supabase al formato esperado
+            events = data.map(event => ({
+                id: event.id,
+                name: event.title,
+                game: 'Duck Game', // Puedes modificar esto si tienes una columna específica
+                type: getEventTypeByColor(event.color),
+                startDate: event.start_date,
+                endDate: event.end_date,
+                startTime: event.start_time || 'Por definir',
+                endTime: event.end_time || 'Por definir',
+                description: event.description || 'Sin descripción disponible',
+                icon: event.icon || 'fa-gamepad',
+                color: event.color || '#5865f2',
+                created_at: event.created_at
+            }));
+            
+            console.log(`✅ ${events.length} eventos cargados desde Supabase`);
+            
+        } catch (error) {
+            console.error('Error al cargar eventos:', error);
+            showError('Error al cargar los eventos. Intenta recargar la página.');
+        } finally {
             loadingElement.style.display = 'none';
-            renderCalendar();
-        }, 800);
+        }
+    }
+    
+    // Función auxiliar para determinar tipo de evento por color
+    function getEventTypeByColor(color) {
+        const colorMap = {
+            '#5865f2': 1, // Azul - Torneo
+            '#10b981': 2, // Verde - Liga
+            '#f59e0b': 3, // Naranja - Evento Especial
+            '#ef4444': 4, // Rojo - Eliminatorio
+            '#8b5cf6': 5  // Púrpura - Clasificatorio
+        };
+        
+        return colorMap[color.toLowerCase()] || 1;
+    }
+    
+    // Función para mostrar error
+    function showError(message) {
+        calendarBody.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>${message}</p>
+                <button onclick="location.reload()" class="btn discord-btn">
+                    <i class="fas fa-redo"></i> Reintentar
+                </button>
+            </div>
+        `;
     }
     
     // Función para cambiar de semana
@@ -177,18 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const endStr = endOfWeek.toLocaleDateString('es-ES', options);
         
         weekRangeElement.textContent = `${startStr} - ${endStr}`;
-        
-        // Agregar botón "Hoy" si no está presente
-        if (!document.getElementById('today-btn')) {
-            const todayBtn = document.createElement('button');
-            todayBtn.id = 'today-btn';
-            todayBtn.className = 'calendar-btn';
-            todayBtn.innerHTML = '<i class="fas fa-calendar-day"></i> Hoy';
-            todayBtn.addEventListener('click', goToToday);
-            
-            const controls = document.querySelector('.calendar-controls');
-            controls.insertBefore(todayBtn, controls.children[1]);
-        }
     }
     
     // Función para renderizar los eventos
@@ -200,6 +175,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="no-events">
                     <i class="fas fa-calendar-times"></i>
                     <p>No hay eventos programados para esta semana</p>
+                    <button onclick="initCalendar()" class="btn secondary-btn">
+                        <i class="fas fa-redo"></i> Recargar eventos
+                    </button>
                 </div>
             `;
             return;
@@ -216,6 +194,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             return (eventStart <= endOfWeek && eventEnd >= startOfWeek);
         });
+        
+        if (weekEvents.length === 0) {
+            calendarBody.innerHTML = `
+                <div class="no-events">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No hay eventos programados para esta semana</p>
+                </div>
+            `;
+            return;
+        }
         
         weekEvents.forEach(event => {
             createEventRow(event, startOfWeek);
@@ -235,7 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
         infoDiv.className = 'event-info';
         infoDiv.innerHTML = `
             <div class="event-name">${event.name}</div>
-            <div class="event-game">${event.game}</div>
+            <div class="event-game">
+                <i class="fas ${event.icon}"></i> ${event.game}
+            </div>
         `;
         row.appendChild(infoDiv);
         
@@ -263,10 +253,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const barWidth = visibleDuration * dayWidth;
             
             const bar = document.createElement('div');
-            bar.className = `event-bar event-type-${event.type}`;
+            bar.className = 'event-bar';
             bar.style.left = `${startPosition}%`;
             bar.style.width = `${barWidth}%`;
-            bar.innerHTML = `<span>${event.name}</span>`;
+            bar.style.background = event.color;
+            bar.innerHTML = `
+                <span>
+                    <i class="fas ${event.icon}"></i> ${event.name}
+                </span>
+            `;
             
             // Agregar evento de clic para mostrar detalles
             bar.addEventListener('click', () => showEventDetails(event));
@@ -298,9 +293,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="event-description" id="event-description-content"></div>
                         <div class="modal-actions">
                             <button class="btn secondary-btn" id="close-modal-btn">Cerrar</button>
-                            <button class="btn discord-btn" id="register-event-btn">
-                                <i class="fas fa-user-plus"></i> Inscribirse
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -321,15 +313,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     modal.style.display = 'none';
                 }
             });
-            
-            document.getElementById('register-event-btn').addEventListener('click', () => {
-                alert(`Inscripción al evento: ${event.name}`);
-                // Aquí integrarías con Supabase para inscripciones
-            });
         }
         
         // Llenar contenido del modal
-        const eventType = eventTypes.find(t => t.id === event.type);
+        const eventStart = new Date(event.startDate);
+        const eventEnd = new Date(event.endDate);
         
         document.getElementById('event-details-content').innerHTML = `
             <div class="detail-item">
@@ -337,28 +325,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="detail-value">${event.name}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Juego</span>
-                <span class="detail-value">${event.game}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Tipo</span>
-                <span class="detail-value" style="color: ${eventType.color}">${eventType.name}</span>
-            </div>
-            <div class="detail-item">
                 <span class="detail-label">Fecha</span>
                 <span class="detail-value">${formatDateRange(event.startDate, event.endDate)}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Hora</span>
-                <span class="detail-value">${event.time}</span>
+                <span class="detail-label">Horario</span>
+                <span class="detail-value">${formatTimeRange(event.startTime, event.endTime)}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Premio</span>
-                <span class="detail-value">${event.prize}</span>
+                <span class="detail-label">Duración</span>
+                <span class="detail-value">${calculateDuration(event.startDate, event.endDate)}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Participantes</span>
-                <span class="detail-value">${event.participants}</span>
+                <span class="detail-label">Tipo</span>
+                <span class="detail-value" style="color: ${event.color}">
+                    <i class="fas ${event.icon}"></i> ${getEventTypeName(event.type)}
+                </span>
             </div>
         `;
         
@@ -373,16 +355,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para renderizar la leyenda
     function renderLegend() {
+        // Agrupar eventos por color para la leyenda
+        const colorMap = {};
+        
+        events.forEach(event => {
+            if (!colorMap[event.color]) {
+                colorMap[event.color] = {
+                    color: event.color,
+                    icon: event.icon,
+                    count: 0
+                };
+            }
+            colorMap[event.color].count++;
+        });
+        
         legendItemsElement.innerHTML = '';
         
-        eventTypes.forEach(type => {
-            const item = document.createElement('div');
-            item.className = 'legend-item';
-            item.innerHTML = `
-                <div class="legend-color" style="background: ${type.color}"></div>
-                <span class="legend-text">${type.name}</span>
+        Object.values(colorMap).forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'legend-item';
+            itemElement.innerHTML = `
+                <div class="legend-color" style="background: ${item.color}">
+                    <i class="fas ${item.icon}"></i>
+                </div>
+                <span class="legend-text">${item.count} evento(s)</span>
             `;
-            legendItemsElement.appendChild(item);
+            legendItemsElement.appendChild(itemElement);
         });
     }
     
@@ -406,42 +404,65 @@ document.addEventListener('DOMContentLoaded', function() {
         const end = new Date(endStr);
         
         if (startStr === endStr) {
-            return start.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+            return start.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long',
+                year: 'numeric'
+            });
         }
         
-        const startFormatted = start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-        const endFormatted = end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+        const startFormatted = start.toLocaleDateString('es-ES', { 
+            day: 'numeric', 
+            month: 'short' 
+        });
+        const endFormatted = end.toLocaleDateString('es-ES', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        });
         
         return `${startFormatted} - ${endFormatted}`;
     }
     
-    // Integración con Supabase (ejemplo básico)
-    async function fetchEventsFromSupabase() {
-        try {
-            const { data, error } = await supabase
-                .from('events')
-                .select('*')
-                .order('start_date', { ascending: true });
-            
-            if (error) throw error;
-            
-            // Transformar datos de Supabase al formato esperado
-            return data.map(event => ({
-                id: event.id,
-                name: event.name,
-                game: event.game,
-                type: event.type_id,
-                startDate: event.start_date,
-                endDate: event.end_date,
-                description: event.description,
-                time: event.time,
-                prize: event.prize,
-                participants: event.max_participants
-            }));
-        } catch (error) {
-            console.error('Error al cargar eventos:', error);
-            return [];
-        }
+    function formatTimeRange(startTime, endTime) {
+        if (!startTime || startTime === 'Por definir') return 'Horario por definir';
+        if (!endTime || endTime === 'Por definir') return startTime;
+        
+        return `${startTime} - ${endTime}`;
+    }
+    
+    function calculateDuration(startStr, endStr) {
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        
+        if (diffDays === 1) return '1 día';
+        return `${diffDays} días`;
+    }
+    
+    function getEventTypeName(typeId) {
+        const typeMap = {
+            1: 'Torneo',
+            2: 'Liga',
+            3: 'Evento Especial',
+            4: 'Eliminatorio',
+            5: 'Clasificatorio'
+        };
+        return typeMap[typeId] || 'Evento';
+    }
+    
+    // Función para formatear fecha como YYYY-MM-DD
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+    
+    // Función para agregar días a una fecha
+    function addDays(date, days) {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
     }
 });
 [file content end]
