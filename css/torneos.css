@@ -431,4 +431,79 @@
         height: 1.5rem;
         font-size: 1rem;
     }
+
+        /* === ESTILOS SIMPLES PARA CALENDARIO FUNCIONAL === */
+    
+    /* Fila del calendario */
+    .calendar-row {
+        display: flex;
+        min-height: 60px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+    }
+    
+    /* Etiqueta de la fila */
+    .row-label {
+        width: 200px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: rgba(15, 23, 42, 0.7);
+        flex-shrink: 0;
+    }
+    
+    .row-label.empty {
+        background-color: rgba(15, 23, 42, 0.5);
+    }
+    
+    /* Contenedor de días */
+    .days-container {
+        flex: 1;
+        display: flex;
+        position: relative;
+        min-height: 60px;
+    }
+    
+    /* Columnas de días */
+    .day-column {
+        flex: 1;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        min-height: 60px;
+    }
+    
+    .day-column:last-child {
+        border-right: none;
+    }
+    
+    /* Las barras se posicionan ABSOLUTAMENTE en days-container */
+    .event-bar {
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        height: 30px !important;
+        background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2)) !important;
+        border-radius: 6px !important;
+        padding: 0 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        color: white !important;
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        z-index: 2 !important;
+        cursor: pointer !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    /* Asegurar que days-container permita posicionamiento absoluto */
+    .days-container {
+        position: relative !important;
+    }
 }
