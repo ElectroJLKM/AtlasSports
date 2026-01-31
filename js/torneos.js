@@ -66,13 +66,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function showError(message) {
-        document.getElementById('calendar-body').innerHTML = `
-            <div class="no-events">
-                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                <p>${message}</p>
-            </div>
-        `;
-        document.getElementById('loading').style.display = 'none';
+        const calendarBody = document.getElementById('calendar-body');
+        if (calendarBody) {
+            calendarBody.innerHTML = `
+                <div class="no-events">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+        
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
     }
 
     // === CARGAR EVENTOS ===
@@ -101,8 +108,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             if (events.length === 0) {
                 console.log('ℹ️ No hay eventos en la base de datos');
-                // Mostrar mensaje en lugar de error
-                document.getElementById('loading').style.display = 'none';
+                showNoEventsMessage();
             } else {
                 // Debug: mostrar información de eventos
                 console.log('📅 Eventos recibidos:', events);
@@ -116,15 +122,31 @@ document.addEventListener('DOMContentLoaded', async function() {
                         end_time: event.end_time
                     });
                 });
+                
+                renderCalendar();
             }
-            
-            renderCalendar();
             
         } catch (error) {
             console.error('❌ Error cargando eventos:', error);
             showError('Error cargando los eventos: ' + error.message);
         } finally {
-            document.getElementById('loading').style.display = 'none';
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+        }
+    }
+
+    function showNoEventsMessage() {
+        const calendarBody = document.getElementById('calendar-body');
+        if (calendarBody) {
+            calendarBody.innerHTML = `
+                <div class="no-events">
+                    <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>No hay eventos programados.</p>
+                    <p class="small-text">Agrega eventos desde el panel de administración.</p>
+                </div>
+            `;
         }
     }
 
@@ -159,6 +181,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     // === RENDERIZAR CALENDARIO ===
     function renderCalendarHeader() {
         const header = document.getElementById('calendar-header');
+        if (!header) return;
+        
         let html = '<div class="day-header empty"></div>';
         
         const today = new Date();
@@ -180,11 +204,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         
         header.innerHTML = html;
-        document.getElementById('week-range').textContent = getWeekRange(currentWeekStart);
+        
+        const weekRangeElement = document.getElementById('week-range');
+        if (weekRangeElement) {
+            weekRangeElement.textContent = getWeekRange(currentWeekStart);
+        }
     }
 
     function renderCalendarBody() {
         const body = document.getElementById('calendar-body');
+        if (!body) return;
         
         eventRows = {};
         
@@ -314,7 +343,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         
         body.innerHTML = html;
-        document.getElementById('loading').style.display = 'none';
+        
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
         
         renderEventBars();
         renderLegend();
@@ -400,6 +433,8 @@ ${event.description ? '📝 ' + event.description : ''}
 
     function renderLegend() {
         const legendItems = document.getElementById('legend-items');
+        if (!legendItems) return;
+        
         const uniqueEvents = [...new Map(events.map(e => [e.title, {
             color: e.color || '#5865f2',
             title: e.title,
@@ -407,18 +442,19 @@ ${event.description ? '📝 ' + event.description : ''}
         }])).values()];
         
         let html = '';
-        uniqueEvents.forEach(event => {
-            html += `
-                <div class="legend-item">
-                    <div class="legend-color" style="background-color: ${event.color}">
-                        <i class="fas ${event.icon}"></i>
+        if (uniqueEvents.length > 0) {
+            uniqueEvents.forEach(event => {
+                html += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: ${event.color}">
+                            <i class="fas ${event.icon}"></i>
+                        </div>
+                        <div class="legend-text">${event.title}</div>
                     </div>
-                    <div class="legend-text">${event.title}</div>
-                </div>
-            `;
-        });
-        
-        legendItems.innerHTML = html || '<div class="no-events"><p>No hay eventos para mostrar en la leyenda</p></div>';
+                `;
+            });
+            legendItems.innerHTML = html;
+        }
     }
 
     function renderCalendar() {
@@ -434,9 +470,17 @@ ${event.description ? '📝 ' + event.description : ''}
     // === INICIALIZACIÓN ===
     currentWeekStart = getMonday(new Date());
     
-    // Configurar botones
-    document.getElementById('prev-week')?.addEventListener('click', () => changeWeek(-1));
-    document.getElementById('next-week')?.addEventListener('click', () => changeWeek(1));
+    // Configurar botones de forma segura
+    const prevWeekBtn = document.getElementById('prev-week');
+    const nextWeekBtn = document.getElementById('next-week');
+    
+    if (prevWeekBtn) {
+        prevWeekBtn.addEventListener('click', () => changeWeek(-1));
+    }
+    
+    if (nextWeekBtn) {
+        nextWeekBtn.addEventListener('click', () => changeWeek(1));
+    }
     
     // Botón "Hoy"
     const todayBtn = document.createElement('button');
