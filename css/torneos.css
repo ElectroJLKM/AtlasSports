@@ -483,5 +483,144 @@
     width: 95%;
     margin: 1rem;
   }
+      /* Agrega esto al final de torneos.css */
+    
+    /* ===== MENSAJES DE ERROR Y VACÍO ===== */
+    .error-message,
+    .no-events {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+      text-align: center;
+      gap: 1.5rem;
+    }
+    
+    .error-message i,
+    .no-events i {
+      font-size: 3rem;
+      color: var(--accent-blue);
+    }
+    
+    .error-message p,
+    .no-events p {
+      font-size: 1.1rem;
+      max-width: 400px;
+    }
+    
+    .event-game i {
+      margin-right: 0.5rem;
+    }
+    
+    .legend-color {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.8rem;
+    }
+    
+    /* Estilos para la sección de inscripciones */
+    .inscripciones-section {
+      padding: 2rem 2.5rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .inscripciones-section .container {
+      background-color: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .inscripciones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .inscripcion-card {
+      background-color: rgba(15, 23, 42, 0.5);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+    }
+    
+    .inscripcion-card:hover {
+      border-color: var(--accent-blue);
+      transform: translateY(-3px);
+    }
+    
+    .inscripcion-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .inscripcion-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
+    }
+    
+    .inscripcion-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .inscripcion-date {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+    
+    .inscripcion-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+    
+    .inscripcion-status {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    
+    .status-open {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+    
+    .status-closed {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    
+    .inscripcion-participants {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+    
+    /* Estilo para el botón dentro del evento en el calendario */
+    .event-bar span i {
+      margin-right: 8px;
+    }
 }
 [file content end]
