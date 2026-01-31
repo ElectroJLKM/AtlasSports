@@ -1,102 +1,23 @@
 /* ===== ESTILOS ESPECÍFICOS PARA TORNEOS ===== */
+/* ... (mantén todo hasta .calendar-container) ... */
 
-.hero-torneos {
-    padding: 3rem 2.5rem;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.gradient-text {
-    background: linear-gradient(90deg, var(--accent-blue), #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.calendario-section {
-    padding: 3rem 2.5rem;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.container {
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
-    padding: 2.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.section-subtitle {
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
-    text-align: center;
-}
-
-/* Controles del calendario */
-.calendar-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    background-color: rgba(15, 23, 42, 0.7);
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.current-week {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    background-color: rgba(88, 101, 242, 0.2);
-    padding: 0.5rem 1.5rem;
-    border-radius: var(--border-radius);
-}
-
-.calendar-btn {
-    background-color: var(--accent-blue);
-    color: white;
-    border: none;
-    padding: 0.7rem 1.5rem;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.calendar-btn:hover {
-    background-color: var(--accent-blue-hover);
-    transform: translateY(-2px);
-}
-
-.calendar-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Contenedor del calendario */
 .calendar-container {
     background-color: rgba(15, 23, 42, 0.7);
     border-radius: var(--border-radius);
-    overflow: hidden;
+    overflow: hidden; /* MANTÉN hidden aquí */
     border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
 }
 
-/* Encabezado de días */
+/* Encabezado de días - USA DISPLAY: FLEX para mejor compatibilidad */
 .calendar-header {
-    display: grid;
-    grid-template-columns: 200px repeat(7, 1fr);
+    display: flex;
     background-color: rgba(30, 41, 59, 0.9);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .day-header {
+    flex: 1;
     padding: 1.2rem 0.5rem;
     text-align: center;
     font-weight: 600;
@@ -105,106 +26,64 @@
 }
 
 .day-header.empty {
+    flex: 0 0 200px;
     background-color: rgba(15, 23, 42, 0.9);
 }
 
-.day-header .date {
-    font-size: 1.8rem;
-    display: block;
-    margin-bottom: 0.2rem;
-}
+/* === NUEVA VERSIÓN SIMPLIFICADA PARA EVENTOS === */
 
-.day-header .day {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.day-header.today {
-    background-color: rgba(88, 101, 242, 0.2);
-    position: relative;
-}
-
-.day-header.today::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: var(--accent-blue);
-}
-
-/* Cuerpo del calendario */
-.calendar-body {
-    min-height: 500px;
-    position: relative;
-}
-
-/* === ESTILOS MEJORADOS PARA EVENTOS (VERSIÓN CORREGIDA) === */
-
-/* Filas de eventos - USAR FLEX en lugar de GRID para compatibilidad */
 .event-row {
     display: flex;
-    min-height: 70px;
+    min-height: 80px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
 }
 
-.event-row:hover {
-    background-color: rgba(255, 255, 255, 0.02);
-}
-
-/* Etiqueta del evento (columna izquierda) */
 .event-label {
     width: 200px;
-    padding: 1rem;
+    flex-shrink: 0;
+    padding: 0.8rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.8rem;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     background-color: rgba(15, 23, 42, 0.7);
-    flex-shrink: 0;
 }
 
-.event-icon {
-    width: 2rem;
-    height: 2rem;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    flex-shrink: 0;
+.event-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .event-title {
     font-weight: 600;
     color: var(--text-primary);
     line-height: 1.2;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .event-dates {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-top: 0.2rem;
-}
-
-.event-time {
     font-size: 0.8rem;
     color: var(--text-secondary);
-    opacity: 0.8;
-    margin-top: 0.1rem;
+    white-space: nowrap;
 }
 
-/* Celdas de días */
-.day-cell {
-    position: relative;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+/* CONTENEDOR DE CELDAS - LA CLAVE ESTÁ AQUÍ */
+.calendar-cells {
     flex: 1;
-    min-height: 70px;
+    display: flex;
+    position: relative;
+    min-height: 80px;
+}
+
+.day-cell {
+    flex: 1;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
     background-color: rgba(15, 23, 42, 0.3);
 }
 
@@ -212,14 +91,22 @@
     border-right: none;
 }
 
-/* === BARRAS DE EVENTOS MEJORADAS === */
+/* BARRAS DE EVENTO MEJORADAS */
+.event-bar-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
 .event-bar {
     position: absolute;
     top: 50%;
-    left: 0;
-    height: 36px;
     transform: translateY(-50%);
-    background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
+    height: 40px;
+    background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.3));
     border-radius: 8px;
     padding: 0 12px;
     display: flex;
@@ -233,17 +120,14 @@
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     z-index: 2;
     cursor: pointer;
-    border: 2px solid rgba(255,255,255,0.3);
-}
-
-.event-bar.overlap-2 {
-    height: 30px;
-    top: 60%;
-    z-index: 1;
+    border: 2px solid rgba(255,255,255,0.4);
+    pointer-events: auto;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .event-bar:hover {
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-50%) scale(1.02);
     z-index: 10;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
@@ -255,404 +139,75 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .event-bar i {
     font-size: 0.9rem;
-    filter: brightness(1.2);
     flex-shrink: 0;
 }
 
-/* Leyenda */
-.legend {
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+.event-bar-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 }
 
-.legend h3 {
-    margin-bottom: 1.2rem;
-    color: var(--text-primary);
+/* Ajustes para barras superpuestas */
+.event-bar.overlap-2 {
+    height: 34px;
+    top: 60%;
+    z-index: 1;
 }
 
-.legend-items {
+/* Loading y estados vacíos */
+.loading, .no-events {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.legend-color {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-}
-
-.legend-text {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-/* Loading y estado vacío */
-.loading, .no-events {
-    text-align: center;
     padding: 3rem;
     color: var(--text-secondary);
     font-size: 1.1rem;
-    position: absolute;
+    text-align: center;
     width: 100%;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-}
-
-.loading-spinner {
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-top: 3px solid var(--accent-blue);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.no-events {
-    background: rgba(15, 23, 42, 0.5);
-    border-radius: var(--border-radius);
-    margin: 2rem 0;
-}
-
-.no-events i {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: var(--accent-blue);
-    opacity: 0.7;
+    min-height: 300px;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
     .event-label {
-        width: 150px;
-        padding: 0.8rem;
+        width: 180px;
     }
     
-    .calendar-header {
-        grid-template-columns: 150px repeat(7, 1fr);
-    }
-}
-
-@media (max-width: 1024px) {
-    .calendar-container {
-        overflow-x: auto;
-    }
-    
-    .calendar-header, .event-row {
-        min-width: 1000px;
+    .day-header.empty {
+        flex: 0 0 180px;
     }
 }
 
 @media (max-width: 768px) {
-    .calendario-section, .hero-torneos {
-        padding: 2rem 1rem;
-    }
-    
-    .container {
-        padding: 1.5rem;
-    }
-    
-    .calendar-controls {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .calendar-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .legend-items {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
     .event-label {
-        width: 130px;
+        width: 150px;
         padding: 0.6rem;
     }
     
+    .day-header.empty {
+        flex: 0 0 150px;
+    }
+    
     .event-bar {
-        height: 30px;
-        font-size: 0.75rem;
+        height: 36px;
+        font-size: 0.8rem;
         padding: 0 8px;
     }
     
     .event-bar.overlap-2 {
-        height: 26px;
-    }
-    
-    .event-icon {
-        width: 1.5rem;
-        height: 1.5rem;
-        font-size: 1rem;
-    }
-    
-    .event-info {
-        flex: 1;
-        min-width: 0; /* Permite que el texto se trunque */
-    }
-
-    .event-bar-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    /* Asegurar que el loading esté posicionado correctamente */
-    .loading {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(15, 23, 42, 0.8);
-        z-index: 100;
-    }
-
-/* Mejor visualización para mensajes de error/no eventos */
-    .no-events {
-        padding: 3rem;
-        text-align: center;
-        color: var(--text-secondary);
-        background-color: rgba(15, 23, 42, 0.5);
-        border-radius: var(--border-radius);
-        margin: 2rem auto;
-        max-width: 500px;
-    }
-
-    .no-events i {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        color: var(--accent-blue);
-        opacity: 0.7;
-    }
-
-    .no-events p {
-        margin: 0.5rem 0;
-    }
-
-    .no-events .small-text {
-        font-size: 0.9rem;
-        opacity: 0.7;
-    }
-
-        /* En tu torneos.css, añade: */
-    .event-bar {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        height: 36px;
-        transform: translateY(-50%);
-        background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
-        border-radius: 8px;
-        padding: 0 12px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        color: white;
-        font-size: 0.85rem;
-        font-weight: 500;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        z-index: 2;
-        cursor: pointer;
-        border: 2px solid rgba(255,255,255,0.3);
-        box-sizing: border-box; /* Importante para width correcto */
-    }
-    
-    /* Barras que abarcan múltiples días */
-    .event-bar[style*="width: 100%"] {
-        border-radius: 8px;
-    }
-    
-    .event-bar[style*="width: 85.7143%"] { /* 6 días */
-        border-radius: 8px;
-    }
-    
-    .event-bar[style*="width: 71.4286%"] { /* 5 días */
-        border-radius: 8px;
-    }
-    
-    .event-bar[style*="width: 57.1429%"] { /* 4 días */
-        border-radius: 8px;
-    }
-    
-    .event-bar[style*="width: 42.8571%"] { /* 3 días */
-        border-radius: 8px;
-    }
-    
-    .event-bar[style*="width: 28.5714%"] { /* 2 días */
-        border-radius: 8px;
+        height: 30px;
     }
     
     .event-bar-content {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
-    
-    .event-bar-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
-        min-width: 0;
-    }
-
-        /* === CRITICAL: ESTILOS PARA BARRAS QUE OCUPAN MÚLTIPLES CELDAS === */
-    
-    /* Las celdas deben permitir que las barras se extiendan más allá de sus límites */
-    .day-cell {
-        position: relative;
-        flex: 1;
-        min-height: 70px;
-        background-color: rgba(15, 23, 42, 0.3);
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
-        overflow: visible !important; /* IMPORTANTE: permitir desbordamiento */
-    }
-    
-    /* Asegurar que todas las celdas tengan overflow visible */
-    .calendar-body .day-cell {
-        overflow: visible;
-    }
-    
-    /* Las barras deben poder salirse de su contenedor */
-    .event-bar {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        height: 36px;
-        transform: translateY(-50%);
-        background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
-        border-radius: 8px;
-        padding: 0 12px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        color: white;
-        font-size: 0.85rem;
-        font-weight: 500;
-        overflow: visible; /* IMPORTANTE */
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        z-index: 2;
-        cursor: pointer;
-        border: 2px solid rgba(255,255,255,0.3);
-        box-sizing: border-box;
-        white-space: nowrap;
-    }
-    
-    /* Cuando una barra está en una celda pero debe extenderse a la derecha */
-    .event-row {
-        position: relative;
-        display: flex;
-        min-height: 70px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        overflow: visible; /* IMPORTANTE: permitir que las barras se extiendan */
-    }
-    
-    /* El contenedor del calendario también debe permitir overflow */
-    .calendar-body {
-        min-height: 500px;
-        position: relative;
-        overflow: visible !important;
-    }
-    
-    /* Ajustar el contenedor principal del calendario */
-    .calendar-container {
-        overflow: visible !important; /* Cambiar de 'hidden' a 'visible' */
-    }
-    
-    /* Estilos específicos para barras que abarcan múltiples días */
-    .event-bar[style*="width: 100%"] {
-        border-radius: 8px;
-        /* Asegurar que ocupe todo el espacio */
-        width: calc(700% - 6px) !important; /* 7 días * 100% - bordes */
-        box-sizing: border-box;
-    }
-    
-    .event-bar[style*="width: 85.7143%"] { /* 6 días */
-        width: calc(600% - 5px) !important;
-    }
-    
-    .event-bar[style*="width: 71.4286%"] { /* 5 días */
-        width: calc(500% - 4px) !important;
-    }
-    
-    .event-bar[style*="width: 57.1429%"] { /* 4 días */
-        width: calc(400% - 3px) !important;
-    }
-    
-    .event-bar[style*="width: 42.8571%"] { /* 3 días */
-        width: calc(300% - 2px) !important;
-    }
-    
-    .event-bar[style*="width: 28.5714%"] { /* 2 días */
-        width: calc(200% - 1px) !important;
-    }
-    
-    /* Asegurar que el contenido de la barra se vea bien */
-    .event-bar-content {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-        pointer-events: none; /* Evitar interferencia con el hover */
-    }
-    
-    .event-bar-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
-        min-width: 0;
-    }
-    
-    /* Clase para celdas que son parte de un evento pero no contienen la barra */
-    .event-part {
-        background-color: rgba(255, 255, 255, 0.01); /* Muy sutil para debug */
+        gap: 6px;
     }
 }
