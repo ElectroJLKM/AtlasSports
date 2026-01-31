@@ -147,66 +147,130 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
+    // === RENDERIZAR CUERPO DEL CALENDARIO ===
     function renderCalendarBody() {
         const body = document.getElementById('calendar-body');
         if (!body) return;
         
-        let html = '';
+        // Limpiar
+        body.innerHTML = '';
         
         // Si no hay eventos
         if (events.length === 0) {
-            html = `
+            body.innerHTML = `
                 <div class="no-events">
                     <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 1rem;"></i>
                     <p>No hay eventos programados para esta semana.</p>
-                    <p class="small-text">Agrega eventos desde el panel de administración.</p>
                 </div>
             `;
-        } else {
-            // Organizar eventos por filas (evitar superposición)
-            const rows = organizeEventsIntoRows();
+            return;
+        }
+        
+        // Calcular límites de la semana
+        const weekStart = new Date(currentWeekStart);
+        weekStart.setHours(0, 0, 0, 0);
+        
+        const weekEnd = new Date(currentWeekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        
+        // Filtrar eventos visibles esta semana
+        const visibleEvents = events.filter(event => {
+            const eventStart = new Date(event.start_date);
+            const eventEnd = new Date(event.end_date);
+            return eventEnd >= weekStart && eventStart <= weekEnd;
+        });
+        
+        // Si no hay eventos visibles
+        if (visibleEvents.length === 0) {
+            body.innerHTML = `
+                <div class="no-events">
+                    <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>No hay eventos programados para esta semana.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Organizar en filas (máximo 5 filas para evitar superposición excesiva)
+        const rows = [[], [], [], [], []];
+        
+        visibleEvents.forEach(event => {
+            const eventStart = new Date(event.start_date);
+            const eventEnd = new Date(event.end_date);
             
-            // Crear una fila por cada nivel
-            rows.forEach((rowEvents, rowIndex) => {
-                if (rowEvents.length === 0) return;
+            // Calcular días visibles en esta semana
+            const visibleStart = eventStart < weekStart ? weekStart : eventStart;
+            const visibleEnd = eventEnd > weekEnd ? weekEnd : eventEnd;
+            
+            const startDay = Math.max(0, Math.floor((visibleStart - weekStart) / (1000 * 60 * 60 * 24)));
+            const durationDays = Math.floor((visibleEnd - visibleStart) / (1000 * 60 * 60 * 24)) + 1;
+            
+            // Buscar primera fila disponible
+            for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                let conflict = false;
                 
-                const firstEvent = rowEvents[0];
-                const event = events.find(e => e.id === firstEvent.eventId);
-                if (!event) return;
-                
-                html += `
-                    <div class="event-row" id="row-${rowIndex}">
-                        <div class="event-label">
-                            <div class="event-icon" style="background-color: ${firstEvent.color}20; color: ${firstEvent.color}">
-                                <i class="fas ${firstEvent.icon}"></i>
-                            </div>
-                            <div class="event-info">
-                                <div class="event-title">${event.title}</div>
-                                <div class="event-dates">${formatDisplayDate(new Date(event.start_date))} - ${formatDisplayDate(new Date(event.end_date))}</div>
-                                ${event.start_time ? `<div class="event-time">${formatTime(event.start_time)} - ${formatTime(event.end_time)}</div>` : ''}
-                            </div>
-                        </div>
-                        
-                        <!-- Contenedor para los 7 días -->
-                        <div class="calendar-days-container">
-                `;
-                
-                // Crear 7 slots (uno por día)
-                for (let day = 0; day < 7; day++) {
-                    html += `<div class="day-slot" id="slot-${rowIndex}-${day}"></div>`;
+                for (const existing of rows[rowIndex]) {
+                    // Verificar si hay solapamiento
+                    if (!(startDay + durationDays <= existing.startDay || startDay >= existing.startDay + existing.durationDays)) {
+                        conflict = true;
+                        break;
+                    }
                 }
                 
+                if (!conflict) {
+                    rows[rowIndex].push({
+                        event,
+                        startDay,
+                        durationDays
+                    });
+                    break;
+                }
+            }
+        });
+        
+        // Renderizar filas
+        let html = '';
+        
+        rows.forEach((rowEvents, rowIndex) => {
+            if (rowEvents.length === 0) return;
+            
+            // Crear fila
+            html += `<div class="calendar-row" id="row-${rowIndex}">`;
+            
+            // Columna de etiquetas (vacía si no es la primera fila)
+            if (rowIndex === 0) {
+                const firstEvent = rowEvents[0].event;
                 html += `
+                    <div class="row-label">
+                        <div class="event-icon" style="background-color: ${firstEvent.color || '#5865f2'}20; color: ${firstEvent.color || '#5865f2'}">
+                            <i class="fas ${firstEvent.icon || 'fa-gamepad'}"></i>
+                        </div>
+                        <div class="event-info">
+                            <div class="event-title">${firstEvent.title}</div>
+                            <div class="event-dates">${formatDisplayDate(new Date(firstEvent.start_date))} - ${formatDisplayDate(new Date(firstEvent.end_date))}</div>
                         </div>
                     </div>
                 `;
-            });
-        }
+            } else {
+                html += `<div class="row-label empty"></div>`;
+            }
+            
+            // Crear contenedor de 7 días
+            html += `<div class="days-container">`;
+            
+            // 7 columnas vacías (días)
+            for (let day = 0; day < 7; day++) {
+                html += `<div class="day-column" id="day-${rowIndex}-${day}"></div>`;
+            }
+            
+            html += `</div></div>`;
+        });
         
         body.innerHTML = html;
         
-        // Renderizar barras después de crear el HTML
-        setTimeout(renderEventBars, 10);
+        // Ahora dibujar las barras
+        renderEventBars(rows);
         renderLegend();
     }
 
@@ -285,92 +349,82 @@ document.addEventListener('DOMContentLoaded', async function() {
         return rows;
     }
 
-    function renderEventBars() {
-        const weekStart = new Date(currentWeekStart);
-        weekStart.setHours(0, 0, 0, 0);
-        
-        // Primero, limpiar todos los slots
-        document.querySelectorAll('.day-slot').forEach(slot => {
-            slot.innerHTML = '';
-        });
+    // === DIBUJAR BARRAS ===
+    function renderEventBars(rows) {
+        // Primero limpiar todas las barras existentes
+        document.querySelectorAll('.event-bar').forEach(bar => bar.remove());
         
         // Para cada fila
-        document.querySelectorAll('.event-row').forEach((row, rowIndex) => {
+        rows.forEach((rowEvents, rowIndex) => {
             const rowElement = document.getElementById(`row-${rowIndex}`);
             if (!rowElement) return;
             
-            const daysContainer = rowElement.querySelector('.calendar-days-container');
+            const daysContainer = rowElement.querySelector('.days-container');
             if (!daysContainer) return;
             
-            // Obtener eventos de esta fila
-            const weekEnd = new Date(currentWeekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-            
-            events.forEach(event => {
-                const startDate = new Date(event.start_date);
-                const endDate = new Date(event.end_date);
-                
-                // Verificar si el evento es visible esta semana
-                if (endDate < weekStart || startDate > weekEnd) return;
+            // Para cada evento en esta fila
+            rowEvents.forEach(eventData => {
+                const { event, startDay, durationDays } = eventData;
                 
                 // Calcular posición
-                const visibleStart = startDate < weekStart ? weekStart : startDate;
-                const visibleEnd = endDate > weekEnd ? weekEnd : endDate;
+                const dayWidth = 100 / 7; // 14.2857% por día
+                const left = startDay * dayWidth;
+                const width = durationDays * dayWidth;
                 
-                const startDay = Math.max(0, Math.floor((visibleStart - weekStart) / (1000 * 60 * 60 * 24)));
-                const durationDays = Math.floor((visibleEnd - visibleStart) / (1000 * 60 * 60 * 24)) + 1;
-                
-                // Solo dibujar si este evento está en esta fila
-                const slot = document.getElementById(`slot-${rowIndex}-${startDay}`);
-                if (!slot) return;
-                
-                // Calcular porcentajes
-                const cellWidth = 100 / 7;
-                const left = startDay * cellWidth;
-                const width = durationDays * cellWidth;
+                // Crear barra
+                const bar = document.createElement('div');
+                bar.className = 'event-bar';
+                bar.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: ${left}%;
+                    width: ${width}%;
+                    height: 30px;
+                    background-color: ${event.color || '#5865f2'};
+                    transform: translateY(-50%);
+                    border-radius: 6px;
+                    padding: 0 10px;
+                    display: flex;
+                    align-items: center;
+                    color: white;
+                    font-size: 0.8rem;
+                    font-weight: 500;
+                    z-index: 2;
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    overflow: hidden;
+                    white-space: nowrap;
+                    box-sizing: border-box;
+                `;
                 
                 // Tooltip
                 const startTime = event.start_time ? formatTime(event.start_time) : '';
                 const endTime = event.end_time ? formatTime(event.end_time) : '';
+                bar.title = `${event.title}\n${formatDisplayDate(new Date(event.start_date))}${startTime ? ' ' + startTime : ''} - ${formatDisplayDate(new Date(event.end_date))}${endTime ? ' ' + endTime : ''}`;
                 
-                const tooltip = `
-${event.title}
-📅 ${formatDisplayDate(startDate)}${startTime ? ' ' + startTime : ''}
-➡ ${formatDisplayDate(endDate)}${endTime ? ' ' + endTime : ''}
-${event.description ? '📝 ' + event.description : ''}
-`.trim();
-                
-                // Determinar si mostrar título
-                const showTitle = durationDays >= 2;
-                
-                // Crear barra
-                const barHtml = `
-                    <div class="event-bar" 
-                         style="left: ${left}%; width: ${width}%; background-color: ${event.color || '#5865f2'};"
-                         title="${tooltip.replace(/\n/g, '&#10;')}">
-                        <div class="event-bar-content">
-                            <i class="fas ${event.icon || 'fa-gamepad'}"></i>
-                            ${showTitle ? `<span class="event-bar-title">${event.title}</span>` : ''}
-                        </div>
+                // Contenido
+                bar.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
+                        <i class="fas ${event.icon || 'fa-gamepad'}" style="font-size: 0.9rem;"></i>
+                        ${durationDays >= 2 ? `<span style="overflow: hidden; text-overflow: ellipsis;">${event.title}</span>` : ''}
                     </div>
                 `;
                 
-                // Insertar barra
-                slot.innerHTML = barHtml;
+                // Efectos hover
+                bar.addEventListener('mouseenter', function() {
+                    this.style.zIndex = '100';
+                    this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+                    this.style.transform = 'translateY(-50%) scale(1.02)';
+                });
                 
-                // Añadir efectos hover
-                const bar = slot.querySelector('.event-bar');
-                if (bar) {
-                    bar.addEventListener('mouseenter', function() {
-                        this.style.zIndex = '100';
-                        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-                    });
-                    
-                    bar.addEventListener('mouseleave', function() {
-                        this.style.zIndex = '2';
-                        this.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-                    });
-                }
+                bar.addEventListener('mouseleave', function() {
+                    this.style.zIndex = '2';
+                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                    this.style.transform = 'translateY(-50%)';
+                });
+                
+                // Añadir al contenedor de días
+                daysContainer.appendChild(bar);
             });
         });
     }
