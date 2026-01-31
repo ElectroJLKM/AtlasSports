@@ -417,4 +417,15 @@
         height: 1.5rem;
         font-size: 1rem;
     }
+    
+    .event-info {
+        flex: 1;
+        min-width: 0; /* Permite que el texto se trunque */
+    }
+
+    .event-bar-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
