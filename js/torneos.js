@@ -1,79 +1,423 @@
-// torneos.js - Versión corregida con barras horizontales
-
-document.addEventListener('DOMContentLoaded', async function() {
-    // Inicializar Supabase
-    const supabase = getSupabaseClient();
+[file name]: torneos.js
+[file content begin]
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos DOM
+    const calendarHeader = document.getElementById('calendar-header');
+    const calendarBody = document.getElementById('calendar-body');
+    const weekRangeElement = document.getElementById('week-range');
+    const prevWeekBtn = document.getElementById('prev-week');
+    const nextWeekBtn = document.getElementById('next-week');
+    const legendItemsElement = document.getElementById('legend-items');
+    const loadingElement = document.getElementById('loading');
     
-    if (!supabase) {
-        console.error('❌ Error: Supabase no inicializado');
-        showError('Error de configuración. Recarga la página.');
-        return;
-    }
-    
-    // Variables globales
-    let currentWeekStart = new Date();
+    // Estado del calendario
+    let currentDate = new Date();
     let events = [];
-
-    // === FUNCIONES UTILITARIAS ===
-    function getMonday(date) {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(d.setDate(diff));
+    
+    // Tipos de eventos con colores
+    const eventTypes = [
+        { id: 1, name: 'Torneo Abierto', color: '#5865f2' },
+        { id: 2, name: 'Liga Regular', color: '#10b981' },
+        { id: 3, name: 'Evento Especial', color: '#f59e0b' },
+        { id: 4, name: 'Torneo Eliminatorio', color: '#ef4444' },
+        { id: 5, name: 'Clasificatorio', color: '#8b5cf6' }
+    ];
+    
+    // Datos de ejemplo (reemplazar con datos de Supabase)
+    const sampleEvents = [
+        {
+            id: 1,
+            name: 'Torneo Duck Game Semanal',
+            game: 'Duck Game',
+            type: 1,
+            startDate: getDateString(0),
+            endDate: getDateString(0),
+            description: 'Torneo semanal abierto a todos los jugadores. Modalidad eliminación directa.',
+            time: '20:00',
+            prize: 'Premium Discord + $50',
+            participants: 'Abierto'
+        },
+        {
+            id: 2,
+            name: 'Liga Duck Game Primavera',
+            game: 'Duck Game',
+            type: 2,
+            startDate: getDateString(-2),
+            endDate: getDateString(3),
+            description: 'Liga de temporada con equipos y partidos programados.',
+            time: 'Todo el día',
+            prize: '$500 + Trofeo',
+            participants: '16 equipos'
+        },
+        {
+            id: 3,
+            name: 'Torneo 1v1 Eliminatorio',
+            game: 'Duck Game',
+            type: 4,
+            startDate: getDateString(1),
+            endDate: getDateString(1),
+            description: 'Competencia 1 contra 1, mejor de 3 rondas.',
+            time: '18:00',
+            prize: '$100',
+            participants: '32 jugadores'
+        },
+        {
+            id: 4,
+            name: 'Clasificatorio Regional',
+            game: 'Duck Game',
+            type: 5,
+            startDate: getDateString(4),
+            endDate: getDateString(5),
+            description: 'Clasificatorio para el campeonato regional.',
+            time: '16:00',
+            prize: 'Pase al Regional',
+            participants: 'Abierto'
+        },
+        {
+            id: 5,
+            name: 'Evento Especial: Modo Caos',
+            game: 'Duck Game',
+            type: 3,
+            startDate: getDateString(6),
+            endDate: getDateString(8),
+            description: 'Evento especial con modos de juego personalizados y reglas únicas.',
+            time: '21:00',
+            prize: 'Ítems exclusivos',
+            participants: 'Ilimitado'
+        }
+    ];
+    
+    // Inicialización
+    initCalendar();
+    
+    // Event Listeners
+    prevWeekBtn.addEventListener('click', () => changeWeek(-1));
+    nextWeekBtn.addEventListener('click', () => changeWeek(1));
+    
+    // Función para obtener fecha en formato YYYY-MM-DD
+    function getDateString(daysOffset) {
+        const date = new Date();
+        date.setDate(date.getDate() + daysOffset);
+        return date.toISOString().split('T')[0];
     }
-
-    function formatDisplayDate(date) {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('es-ES', options);
+    
+    // Función de inicialización
+    function initCalendar() {
+        loadEvents();
+        renderCalendar();
+        renderLegend();
     }
-
-    function formatTime(timeString) {
-        if (!timeString) return '';
-        const [hours, minutes] = timeString.split(':');
-        return `${hours}:${minutes}`;
-    }
-
-    function getWeekRange(startDate) {
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 6);
+    
+    // Función para cargar eventos (ejemplo, integrar con Supabase después)
+    function loadEvents() {
+        // Simular carga de datos
+        loadingElement.style.display = 'flex';
         
-        const startMonth = startDate.toLocaleDateString('es-ES', { month: 'short' });
-        const endMonth = endDate.toLocaleDateString('es-ES', { month: 'short' });
+        setTimeout(() => {
+            events = sampleEvents;
+            loadingElement.style.display = 'none';
+            renderCalendar();
+        }, 800);
+    }
+    
+    // Función para cambiar de semana
+    function changeWeek(direction) {
+        currentDate.setDate(currentDate.getDate() + (direction * 7));
+        renderCalendar();
+    }
+    
+    // Función para ir a la semana actual
+    function goToToday() {
+        currentDate = new Date();
+        renderCalendar();
+    }
+    
+    // Función para renderizar el calendario
+    function renderCalendar() {
+        renderWeekHeader();
+        renderWeekRange();
+        renderEvents();
+    }
+    
+    // Función para renderizar el encabezado de la semana
+    function renderWeekHeader() {
+        const startOfWeek = getStartOfWeek(currentDate);
+        calendarHeader.innerHTML = '<div class="day-header empty"></div>';
         
-        if (startMonth === endMonth) {
-            return `${startDate.getDate()} - ${endDate.getDate()} de ${startMonth} ${startDate.getFullYear()}`;
-        } else {
-            return `${startDate.getDate()} de ${startMonth} - ${endDate.getDate()} de ${endMonth} ${startDate.getFullYear()}`;
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            
+            const dayElement = document.createElement('div');
+            dayElement.className = 'day-header';
+            
+            // Marcar si es hoy
+            const today = new Date();
+            if (day.toDateString() === today.toDateString()) {
+                dayElement.classList.add('today');
+            }
+            
+            dayElement.innerHTML = `
+                <span class="date">${day.getDate()}</span>
+                <span class="day-name">${getDayName(day)}</span>
+            `;
+            
+            calendarHeader.appendChild(dayElement);
         }
     }
-
-    function getDayName(date) {
-        const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        return days[date.getDay()];
+    
+    // Función para renderizar el rango de la semana
+    function renderWeekRange() {
+        const startOfWeek = getStartOfWeek(currentDate);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        
+        const options = { month: 'long', day: 'numeric' };
+        const startStr = startOfWeek.toLocaleDateString('es-ES', options);
+        const endStr = endOfWeek.toLocaleDateString('es-ES', options);
+        
+        weekRangeElement.textContent = `${startStr} - ${endStr}`;
+        
+        // Agregar botón "Hoy" si no está presente
+        if (!document.getElementById('today-btn')) {
+            const todayBtn = document.createElement('button');
+            todayBtn.id = 'today-btn';
+            todayBtn.className = 'calendar-btn';
+            todayBtn.innerHTML = '<i class="fas fa-calendar-day"></i> Hoy';
+            todayBtn.addEventListener('click', goToToday);
+            
+            const controls = document.querySelector('.calendar-controls');
+            controls.insertBefore(todayBtn, controls.children[1]);
+        }
     }
-
-    function showError(message) {
-        const calendarBody = document.getElementById('calendar-body');
-        if (calendarBody) {
+    
+    // Función para renderizar los eventos
+    function renderEvents() {
+        calendarBody.innerHTML = '';
+        
+        if (events.length === 0) {
             calendarBody.innerHTML = `
                 <div class="no-events">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>${message}</p>
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No hay eventos programados para esta semana</p>
                 </div>
             `;
+            return;
         }
         
-        const loadingElement = document.getElementById('loading');
-        if (loadingElement) {
-            loadingElement.style.display = 'none';
-        }
-    }
-
-    // === CARGAR EVENTOS ===
-    async function loadEvents() {
-        try {
-            console.log('🔍 Cargando eventos...');
+        const startOfWeek = getStartOfWeek(currentDate);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        
+        // Filtrar eventos que se superponen con esta semana
+        const weekEvents = events.filter(event => {
+            const eventStart = new Date(event.startDate);
+            const eventEnd = new Date(event.endDate);
             
+            return (eventStart <= endOfWeek && eventEnd >= startOfWeek);
+        });
+        
+        weekEvents.forEach(event => {
+            createEventRow(event, startOfWeek);
+        });
+    }
+    
+    // Función para crear una fila de evento
+    function createEventRow(event, startOfWeek) {
+        const eventStart = new Date(event.startDate);
+        const eventEnd = new Date(event.endDate);
+        
+        const row = document.createElement('div');
+        row.className = 'event-row';
+        
+        // Información del evento
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'event-info';
+        infoDiv.innerHTML = `
+            <div class="event-name">${event.name}</div>
+            <div class="event-game">${event.game}</div>
+        `;
+        row.appendChild(infoDiv);
+        
+        // Contenedor para la barra del evento
+        const barContainer = document.createElement('div');
+        barContainer.className = 'event-days-container';
+        
+        // Calcular posición y ancho de la barra
+        const weekStartTime = startOfWeek.getTime();
+        const dayWidth = 100 / 7; // Porcentaje
+        
+        // Calcular inicio relativo (puede ser negativo si empieza antes de la semana)
+        const daysFromWeekStart = Math.floor((eventStart.getTime() - weekStartTime) / (1000 * 60 * 60 * 24));
+        const startPosition = Math.max(daysFromWeekStart, 0) * dayWidth;
+        
+        // Calcular duración en días
+        const eventDurationDays = Math.ceil((eventEnd.getTime() - eventStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        
+        // Duración visible en esta semana
+        const visibleStartDay = Math.max(0, -daysFromWeekStart);
+        const visibleEndDay = Math.min(7, eventDurationDays - Math.max(0, -daysFromWeekStart));
+        const visibleDuration = visibleEndDay - visibleStartDay;
+        
+        if (visibleDuration > 0) {
+            const barWidth = visibleDuration * dayWidth;
+            
+            const bar = document.createElement('div');
+            bar.className = `event-bar event-type-${event.type}`;
+            bar.style.left = `${startPosition}%`;
+            bar.style.width = `${barWidth}%`;
+            bar.innerHTML = `<span>${event.name}</span>`;
+            
+            // Agregar evento de clic para mostrar detalles
+            bar.addEventListener('click', () => showEventDetails(event));
+            
+            barContainer.appendChild(bar);
+        }
+        
+        row.appendChild(barContainer);
+        calendarBody.appendChild(row);
+    }
+    
+    // Función para mostrar detalles del evento
+    function showEventDetails(event) {
+        // Crear modal si no existe
+        let modal = document.getElementById('event-modal');
+        
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'event-modal';
+            modal.className = 'event-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Detalles del Evento</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="event-details" id="event-details-content"></div>
+                        <div class="event-description" id="event-description-content"></div>
+                        <div class="modal-actions">
+                            <button class="btn secondary-btn" id="close-modal-btn">Cerrar</button>
+                            <button class="btn discord-btn" id="register-event-btn">
+                                <i class="fas fa-user-plus"></i> Inscribirse
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Event listeners para cerrar modal
+            modal.querySelector('.close-modal').addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            
+            modal.querySelector('#close-modal-btn').addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('register-event-btn').addEventListener('click', () => {
+                alert(`Inscripción al evento: ${event.name}`);
+                // Aquí integrarías con Supabase para inscripciones
+            });
+        }
+        
+        // Llenar contenido del modal
+        const eventType = eventTypes.find(t => t.id === event.type);
+        
+        document.getElementById('event-details-content').innerHTML = `
+            <div class="detail-item">
+                <span class="detail-label">Nombre del Evento</span>
+                <span class="detail-value">${event.name}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Juego</span>
+                <span class="detail-value">${event.game}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Tipo</span>
+                <span class="detail-value" style="color: ${eventType.color}">${eventType.name}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Fecha</span>
+                <span class="detail-value">${formatDateRange(event.startDate, event.endDate)}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Hora</span>
+                <span class="detail-value">${event.time}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Premio</span>
+                <span class="detail-value">${event.prize}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Participantes</span>
+                <span class="detail-value">${event.participants}</span>
+            </div>
+        `;
+        
+        document.getElementById('event-description-content').innerHTML = `
+            <h4>Descripción</h4>
+            <p>${event.description}</p>
+        `;
+        
+        // Mostrar modal
+        modal.style.display = 'flex';
+    }
+    
+    // Función para renderizar la leyenda
+    function renderLegend() {
+        legendItemsElement.innerHTML = '';
+        
+        eventTypes.forEach(type => {
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            item.innerHTML = `
+                <div class="legend-color" style="background: ${type.color}"></div>
+                <span class="legend-text">${type.name}</span>
+            `;
+            legendItemsElement.appendChild(item);
+        });
+    }
+    
+    // Funciones auxiliares
+    function getStartOfWeek(date) {
+        const start = new Date(date);
+        const day = start.getDay();
+        const diff = start.getDate() - day + (day === 0 ? -6 : 1); // Ajustar para que la semana empiece el lunes
+        start.setDate(diff);
+        start.setHours(0, 0, 0, 0);
+        return start;
+    }
+    
+    function getDayName(date) {
+        const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        return days[date.getDay()];
+    }
+    
+    function formatDateRange(startStr, endStr) {
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        
+        if (startStr === endStr) {
+            return start.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        }
+        
+        const startFormatted = start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        const endFormatted = end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+        
+        return `${startFormatted} - ${endFormatted}`;
+    }
+    
+    // Integración con Supabase (ejemplo básico)
+    async function fetchEventsFromSupabase() {
+        try {
             const { data, error } = await supabase
                 .from('events')
                 .select('*')
@@ -81,357 +425,23 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             if (error) throw error;
             
-            console.log(`✅ ${data?.length || 0} eventos cargados`);
-            events = data || [];
-            
-            if (events.length === 0) {
-                showNoEventsMessage();
-            } else {
-                renderCalendar();
-            }
-            
+            // Transformar datos de Supabase al formato esperado
+            return data.map(event => ({
+                id: event.id,
+                name: event.name,
+                game: event.game,
+                type: event.type_id,
+                startDate: event.start_date,
+                endDate: event.end_date,
+                description: event.description,
+                time: event.time,
+                prize: event.prize,
+                participants: event.max_participants
+            }));
         } catch (error) {
-            console.error('❌ Error cargando eventos:', error);
-            showError('Error cargando los eventos: ' + error.message);
-        } finally {
-            const loadingElement = document.getElementById('loading');
-            if (loadingElement) {
-                loadingElement.style.display = 'none';
-            }
+            console.error('Error al cargar eventos:', error);
+            return [];
         }
     }
-
-    function showNoEventsMessage() {
-        const calendarBody = document.getElementById('calendar-body');
-        if (calendarBody) {
-            calendarBody.innerHTML = `
-                <div class="no-events">
-                    <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>No hay eventos programados.</p>
-                    <p class="small-text">Agrega eventos desde el panel de administración.</p>
-                </div>
-            `;
-        }
-    }
-
-    // === RENDERIZAR ENCABEZADO ===
-    function renderCalendarHeader() {
-        const header = document.getElementById('calendar-header');
-        if (!header) return;
-        
-        let html = '<div class="day-header empty"></div>';
-        
-        const today = new Date();
-        
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(currentWeekStart);
-            date.setDate(date.getDate() + i);
-            
-            const isToday = date.toDateString() === today.toDateString();
-            const dayName = getDayName(date);
-            const shortDayName = dayName.substring(0, 3);
-            
-            html += `
-                <div class="day-header ${isToday ? 'today' : ''}">
-                    <span class="date">${date.getDate()}</span>
-                    <span class="day">${shortDayName}</span>
-                </div>
-            `;
-        }
-        
-        header.innerHTML = html;
-        
-        const weekRangeElement = document.getElementById('week-range');
-        if (weekRangeElement) {
-            weekRangeElement.textContent = getWeekRange(currentWeekStart);
-        }
-    }
-
-    // === ORGANIZAR EVENTOS EN FILAS ===
-    function organizeEvents() {
-        const weekStart = new Date(currentWeekStart);
-        weekStart.setHours(0, 0, 0, 0);
-        
-        const weekEnd = new Date(currentWeekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
-        
-        // Filtrar eventos visibles
-        const visibleEvents = events.filter(event => {
-            const eventStart = new Date(event.start_date);
-            const eventEnd = new Date(event.end_date);
-            return eventEnd >= weekStart && eventStart <= weekEnd;
-        });
-        
-        // Ordenar por fecha de inicio
-        visibleEvents.sort((a, b) => {
-            const aStart = new Date(a.start_date);
-            const bStart = new Date(b.start_date);
-            return aStart - bStart;
-        });
-        
-        // Crear hasta 5 filas
-        const rows = [[], [], [], [], []];
-        
-        visibleEvents.forEach(event => {
-            const eventStart = new Date(event.start_date);
-            const eventEnd = new Date(event.end_date);
-            
-            // Calcular posición en la semana
-            const visibleStart = eventStart < weekStart ? weekStart : eventStart;
-            const visibleEnd = eventEnd > weekEnd ? weekEnd : eventEnd;
-            
-            const startDay = Math.max(0, Math.floor((visibleStart - weekStart) / (1000 * 60 * 60 * 24)));
-            const durationDays = Math.floor((visibleEnd - visibleStart) / (1000 * 60 * 60 * 24)) + 1;
-            
-            // Buscar fila disponible
-            for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-                let hasConflict = false;
-                
-                for (const existing of rows[rowIndex]) {
-                    // Verificar solapamiento
-                    const existingEnd = existing.startDay + existing.durationDays - 1;
-                    const newEnd = startDay + durationDays - 1;
-                    
-                    if (!(newEnd < existing.startDay || startDay > existingEnd)) {
-                        hasConflict = true;
-                        break;
-                    }
-                }
-                
-                if (!hasConflict) {
-                    rows[rowIndex].push({
-                        event,
-                        startDay,
-                        durationDays
-                    });
-                    break;
-                }
-            }
-        });
-        
-        return rows;
-    }
-
-    // === RENDERIZAR CUERPO DEL CALENDARIO ===
-    function renderCalendarBody() {
-        const body = document.getElementById('calendar-body');
-        if (!body) return;
-        
-        body.innerHTML = '';
-        
-        const rows = organizeEvents();
-        
-        // Verificar si hay eventos visibles
-        const hasEvents = rows.some(row => row.length > 0);
-        
-        if (!hasEvents) {
-            body.innerHTML = `
-                <div class="no-events">
-                    <i class="fas fa-calendar-times" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>No hay eventos programados para esta semana.</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Crear filas del calendario
-        let html = '';
-        
-        rows.forEach((rowEvents, rowIndex) => {
-            if (rowEvents.length === 0) return;
-            
-            // Crear fila
-            html += `<div class="calendar-row" id="row-${rowIndex}">`;
-            
-            // Columna de etiqueta
-            const firstEvent = rowEvents[0].event;
-            const isFirstRow = rowIndex === 0;
-            
-            if (isFirstRow) {
-                html += `
-                    <div class="row-label">
-                        <div class="event-icon" style="background-color: ${firstEvent.color || '#5865f2'}20; color: ${firstEvent.color || '#5865f2'}">
-                            <i class="fas ${firstEvent.icon || 'fa-gamepad'}"></i>
-                        </div>
-                        <div class="event-info">
-                            <div class="event-title">${firstEvent.title}</div>
-                            <div class="event-dates">${formatDisplayDate(new Date(firstEvent.start_date))} - ${formatDisplayDate(new Date(firstEvent.end_date))}</div>
-                            ${firstEvent.start_time ? `<div class="event-time">${formatTime(firstEvent.start_time)} - ${formatTime(firstEvent.end_time)}</div>` : ''}
-                        </div>
-                    </div>
-                `;
-            } else {
-                html += `<div class="row-label empty"></div>`;
-            }
-            
-            // Contenedor de 7 días
-            html += `<div class="days-container" id="days-${rowIndex}">`;
-            
-            // 7 columnas de días (vacías)
-            for (let day = 0; day < 7; day++) {
-                html += `<div class="day-column" id="day-${rowIndex}-${day}"></div>`;
-            }
-            
-            html += `</div></div>`;
-        });
-        
-        body.innerHTML = html;
-        
-        // Dibujar barras
-        drawEventBars(rows);
-        renderLegend();
-    }
-
-    // === DIBUJAR BARRAS DE EVENTOS ===
-    function drawEventBars(rows) {
-        // Limpiar barras existentes
-        document.querySelectorAll('.event-bar').forEach(bar => bar.remove());
-        
-        rows.forEach((rowEvents, rowIndex) => {
-            const daysContainer = document.getElementById(`days-${rowIndex}`);
-            if (!daysContainer) return;
-            
-            rowEvents.forEach(eventData => {
-                const { event, startDay, durationDays } = eventData;
-                
-                // Calcular posición y tamaño
-                const dayWidth = 100 / 7; // 14.2857% por día
-                const left = startDay * dayWidth;
-                const width = durationDays * dayWidth;
-                
-                // Crear barra
-                const bar = document.createElement('div');
-                bar.className = 'event-bar';
-                bar.style.cssText = `
-                    position: absolute;
-                    top: 50%;
-                    left: ${left}%;
-                    width: ${width}%;
-                    height: 30px;
-                    background: linear-gradient(135deg, ${event.color || '#5865f2'}, ${event.color || '#5865f2'}dd);
-                    transform: translateY(-50%);
-                    border-radius: 6px;
-                    padding: 0 10px;
-                    display: flex;
-                    align-items: center;
-                    color: white;
-                    font-size: 0.8rem;
-                    font-weight: 500;
-                    z-index: 2;
-                    cursor: pointer;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                    overflow: hidden;
-                    white-space: nowrap;
-                    box-sizing: border-box;
-                    border: 1px solid rgba(255,255,255,0.3);
-                    transition: all 0.2s ease;
-                `;
-                
-                // Tooltip
-                const startDate = new Date(event.start_date);
-                const endDate = new Date(event.end_date);
-                const startTime = event.start_time ? formatTime(event.start_time) : '';
-                const endTime = event.end_time ? formatTime(event.end_time) : '';
-                
-                bar.title = `${event.title}\n${formatDisplayDate(startDate)}${startTime ? ' ' + startTime : ''} - ${formatDisplayDate(endDate)}${endTime ? ' ' + endTime : ''}${event.description ? '\n' + event.description : ''}`;
-                
-                // Contenido de la barra
-                const showTitle = durationDays >= 2;
-                bar.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
-                        <i class="fas ${event.icon || 'fa-gamepad'}" style="font-size: 0.9rem;"></i>
-                        ${showTitle ? `<span style="overflow: hidden; text-overflow: ellipsis;">${event.title}</span>` : ''}
-                    </div>
-                `;
-                
-                // Efectos hover
-                bar.addEventListener('mouseenter', function() {
-                    this.style.zIndex = '100';
-                    this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-                    this.style.transform = 'translateY(-50%) scale(1.03)';
-                });
-                
-                bar.addEventListener('mouseleave', function() {
-                    this.style.zIndex = '2';
-                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-                    this.style.transform = 'translateY(-50%)';
-                });
-                
-                // Añadir al contenedor
-                daysContainer.appendChild(bar);
-            });
-        });
-    }
-
-    // === RENDERIZAR LEYENDA ===
-    function renderLegend() {
-        const legendItems = document.getElementById('legend-items');
-        if (!legendItems) return;
-        
-        const uniqueEvents = [...new Map(events.map(e => [e.title, {
-            color: e.color || '#5865f2',
-            title: e.title,
-            icon: e.icon || 'fa-gamepad'
-        }])).values()];
-        
-        let html = '';
-        if (uniqueEvents.length > 0) {
-            uniqueEvents.forEach(event => {
-                html += `
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: ${event.color}">
-                            <i class="fas ${event.icon}"></i>
-                        </div>
-                        <div class="legend-text">${event.title}</div>
-                    </div>
-                `;
-            });
-            legendItems.innerHTML = html;
-        }
-    }
-
-    // === RENDERIZAR CALENDARIO COMPLETO ===
-    function renderCalendar() {
-        renderCalendarHeader();
-        renderCalendarBody();
-    }
-
-    // === CAMBIAR SEMANA ===
-    function changeWeek(direction) {
-        currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
-        renderCalendar();
-    }
-
-    // === INICIALIZACIÓN ===
-    currentWeekStart = getMonday(new Date());
-    
-    // Configurar botones
-    const prevWeekBtn = document.getElementById('prev-week');
-    const nextWeekBtn = document.getElementById('next-week');
-    
-    if (prevWeekBtn) {
-        prevWeekBtn.addEventListener('click', () => changeWeek(-1));
-    }
-    
-    if (nextWeekBtn) {
-        nextWeekBtn.addEventListener('click', () => changeWeek(1));
-    }
-    
-    // Botón "Hoy"
-    const todayBtn = document.createElement('button');
-    todayBtn.className = 'calendar-btn';
-    todayBtn.innerHTML = '<i class="fas fa-calendar-day"></i> Hoy';
-    todayBtn.addEventListener('click', () => {
-        currentWeekStart = getMonday(new Date());
-        renderCalendar();
-    });
-    
-    const controls = document.querySelector('.calendar-controls');
-    if (controls) {
-        controls.appendChild(todayBtn);
-    }
-    
-    // Cargar eventos
-    loadEvents();
 });
+[file content end]
