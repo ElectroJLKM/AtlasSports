@@ -470,4 +470,72 @@
         font-size: 0.9rem;
         opacity: 0.7;
     }
+
+        /* En tu torneos.css, añade: */
+    .event-bar {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        height: 36px;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, currentColor, rgba(0,0,0,0.2));
+        border-radius: 8px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 500;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        z-index: 2;
+        cursor: pointer;
+        border: 2px solid rgba(255,255,255,0.3);
+        box-sizing: border-box; /* Importante para width correcto */
+    }
+    
+    /* Barras que abarcan múltiples días */
+    .event-bar[style*="width: 100%"] {
+        border-radius: 8px;
+    }
+    
+    .event-bar[style*="width: 85.7143%"] { /* 6 días */
+        border-radius: 8px;
+    }
+    
+    .event-bar[style*="width: 71.4286%"] { /* 5 días */
+        border-radius: 8px;
+    }
+    
+    .event-bar[style*="width: 57.1429%"] { /* 4 días */
+        border-radius: 8px;
+    }
+    
+    .event-bar[style*="width: 42.8571%"] { /* 3 días */
+        border-radius: 8px;
+    }
+    
+    .event-bar[style*="width: 28.5714%"] { /* 2 días */
+        border-radius: 8px;
+    }
+    
+    .event-bar-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    
+    .event-bar-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+    }
 }
