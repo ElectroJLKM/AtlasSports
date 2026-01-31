@@ -428,4 +428,46 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+
+    /* Asegurar que el loading esté posicionado correctamente */
+    .loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(15, 23, 42, 0.8);
+        z-index: 100;
+    }
+
+/* Mejor visualización para mensajes de error/no eventos */
+    .no-events {
+        padding: 3rem;
+        text-align: center;
+        color: var(--text-secondary);
+        background-color: rgba(15, 23, 42, 0.5);
+        border-radius: var(--border-radius);
+        margin: 2rem auto;
+        max-width: 500px;
+    }
+
+    .no-events i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--accent-blue);
+        opacity: 0.7;
+    }
+
+    .no-events p {
+        margin: 0.5rem 0;
+    }
+
+    .no-events .small-text {
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
 }
