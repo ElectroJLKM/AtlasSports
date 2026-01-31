@@ -385,6 +385,7 @@ ${event.description ? '📝 ' + event.description : ''}
                 // Determinar si mostrar el título en la barra
                 const showTitle = durationDays >= 2; // Mostrar título si dura 2+ días
                 
+                // Crear la barra que abarcará múltiples celdas
                 const barHtml = `
                     <div class="event-bar ${overlapClass}" 
                          style="left: ${left}%; width: ${width}%; background-color: ${color};"
@@ -396,10 +397,15 @@ ${event.description ? '📝 ' + event.description : ''}
                     </div>
                 `;
                 
-                // Insertar en la primera celda que toca el evento
+                // Insertar la barra solo en la PRIMERA celda
+                // PERO hacer que ocupe el espacio de todas las celdas
                 const firstCell = document.getElementById(`cell-${rowIndex}-${startDay}`);
                 if (firstCell) {
                     firstCell.innerHTML = barHtml;
+                    
+                    // Asegurar que la celda tenga posición relativa y el z-index correcto
+                    firstCell.style.position = 'relative';
+                    firstCell.style.overflow = 'visible';
                     
                     // Añadir efectos hover
                     const bar = firstCell.querySelector('.event-bar');
@@ -415,6 +421,18 @@ ${event.description ? '📝 ' + event.description : ''}
                             this.style.zIndex = '2';
                             this.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
                         });
+                    }
+                }
+                
+                // Opcional: Marcar las otras celdas que forman parte del evento
+                // Esto ayuda con el debug pero no es estrictamente necesario
+                for (let day = startDay + 1; day < startDay + durationDays; day++) {
+                    const otherCell = document.getElementById(`cell-${rowIndex}-${day}`);
+                    if (otherCell) {
+                        otherCell.style.position = 'relative';
+                        otherCell.style.overflow = 'visible';
+                        // Podemos añadir una clase para marcar visualmente
+                        otherCell.classList.add('event-part');
                     }
                 }
             });
